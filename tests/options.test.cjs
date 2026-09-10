@@ -139,8 +139,8 @@ test("migration preserves staff option edits and historical consent; retired col
   const s = server();
   s.sheets.FormOptions.find((r) => r[1] === "member")[2] = "Staff label";
   const count = s.sheets.FormOptions.length;
-  s.ctx.migrateV3_();
-  s.ctx.migrateV3_();
+  s.ctx.migrateV4_();
+  s.ctx.migrateV4_();
   assert.equal(s.sheets.FormOptions.length, count);
   assert.equal(
     s.sheets.FormOptions.find((r) => r[1] === "member")[2],
@@ -157,7 +157,7 @@ test("migration preserves staff option edits and historical consent; retired col
     "Other Programs Consent Recorded At",
   ])
     assert.equal(row[key], "");
-  assert.equal(row["Consent Version"], "STEP-2026-03");
+  assert.equal(row["Consent Version"], "STEP-2026-04");
   assert.ok(row["Consent Accepted At"]);
 });
 test("missing, duplicate and unsupported configuration fails closed", () => {
@@ -181,8 +181,8 @@ test("fresh option tabs are seeded once and public choices omit disabled branche
   const s = server();
   delete s.sheets.FormOptions;
   delete s.sheets.AddressOptions;
-  s.ctx.migrateV3_();
-  s.ctx.migrateV3_();
+  s.ctx.migrateV4_();
+  s.ctx.migrateV4_();
   assert.equal(s.sheets.FormOptions.length, 270);
   assert.equal(s.sheets.AddressOptions.length, 1745);
   s.sheets.AddressOptions.find((r) => r[0] === "r18")[4] = false;
@@ -201,7 +201,7 @@ test("legacy receipt survives migration and changed configuration without a seco
  const s=server(), request=s.request(), receipt=s.ctx.submitApplication(request);
  const old={...request.data,category:"OFW",sex:"Male",country:"Seabased OFW",region:"National Capital Region",province:"Metro Manila",city:"Manila",goal:"Find jobs in the Philippines",consentVersion:"STEP-2026-02",otherProgramsConsent:false};
  s.sheets.Applications[1][s.sheets.Applications[0].indexOf("Payload Hash")]=s.ctx.hash_(s.ctx.StepCore.legacyClean(old));
- s.ctx.migrateV3_();
+ s.ctx.migrateV4_();
  const retry=s.ctx.submitApplication({...request,data:old});
  assert.equal(retry.registrationId,receipt.registrationId);assert.equal(s.sheets.Applications.length,2);assert.equal(s.record()["Email Status"],"Pending");
 });

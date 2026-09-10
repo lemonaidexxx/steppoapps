@@ -1,8 +1,8 @@
 # APO STEP
 
-Skills. Training. Empowerment. Progress. District Year 2026–2027.
+Skills. Training. Empowerment. Progress. Developmental Year 2026 - 2027.
 
-An accessible, responsive course catalog and continuous application form for Alpha Phi Omega Philippines, Inc., jointly administered by the Committee on Training and Skills Development and the Committee on Members’ Welfare and Development. Google Apps Script serves the website, writes to a private Google Sheet, and queues confirmation emails through the deployment owner’s Gmail. No participant sign-in or analytics.
+An accessible, responsive course catalog and continuous application form for members of Alpha Phi Omega Philippines, Inc., jointly administered by the Committee on Training and Skills Development and the Committee on Members’ Welfare and Development. Google Apps Script serves the website, writes to a private Google Sheet, and queues confirmation emails through the deployment owner’s Gmail. No participant sign-in or analytics.
 
 ## Local development
 
@@ -33,7 +33,7 @@ Run `python scripts/import-catalog.py path/to/catalog.xlsx` with Python and open
 
 Production starts closed, with email sending disabled. The supplied logo, privacy contact and December 31, 2026 retention cutoff are configured. The owner must authorize GmailApp, install private worker triggers, deploy and run an isolated live test before explicitly opening registration. See [deployment instructions](docs/deployment.md). Only authorized staff should access Applications. No secrets or participant records belong in this public repository.
 
-Applications are independent records. Learner ID is reserved and blank until staff establishes identity. One qualifying membership number may identify multiple family applicants. Duplicate hints never delete, merge, or expose records to applicants. Staff review does not automatically confirm enrollment.
+Applications are independent records. Learner ID is reserved and blank until staff establishes identity. Every applicant supplies their own APO membership details. Family applicants separately identify their OFW relative, who need not be an APO member. Historical membership associations are preserved. Duplicate hints never delete, merge, or expose records to applicants. Staff review does not automatically confirm enrollment.
 
 Registration starts with a validated membership checkpoint, followed by a continuous form with sticky navigation, review/edit dialogs and a linked privacy notice. One required consent covers the declared APO purposes. Classes require 25 learners; this is program information, not a live capacity counter. Applicants may submit separate applications for available offerings. Uncertain email outcomes go to staff review; retention flags never delete records automatically.
 

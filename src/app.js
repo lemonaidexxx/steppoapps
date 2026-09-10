@@ -80,9 +80,9 @@
       k +
       "</div><h1>" +
       title +
-      '</h1><p class="muted">' +
-      description +
-      "</p></div>"
+      "</h1>" +
+      (description ? '<p class="muted">' + description + "</p>" : "") +
+      "</div>"
     );
   }
   function howCards() {
@@ -90,7 +90,9 @@
   }
   function home() {
     return (
-      '<section class="hero"><div><div class="eyebrow">DISTRICT YEAR 2026–2027 · APO PHILIPPINES</div><h1>Skills for your<br>next <em>chapter.</em></h1><p class="intro">New skills. More possibilities. Discover training opportunities for APO members who are current or former OFWs, and their eligible family members.</p><div class="actions">' +
+      '<section class="hero"><div><div class="eyebrow">Developmental Year ' +
+      esc(state.settings.developmentalYear || "2026 - 2027") +
+      ' · APO PHILIPPINES</div><h1>Skills for your<br>next <em>chapter.</em></h1><p class="intro">New skills. More possibilities. Discover training opportunities for APO members who are OFWs or Former OFWs, or family members of an OFW or Former OFW.</p><div class="actions">' +
       button(
         'Explore courses <span aria-hidden="true">↗</span>',
         "courses",
@@ -136,11 +138,7 @@
       ).sort();
     return (
       '<div class="wrap">' +
-      heading(
-        "THE COURSE CATALOG",
-        "Find a course. Build your future.",
-        "Compare training options by institution, learning modality, hours, and city.",
-      ) +
+      heading("THE COURSE CATALOG", "Find a course. Build your future.", "") +
       '<div class="filters"><label>Search courses or institutions<input id="search" type="search" placeholder="What would you like to learn?" value="' +
       esc(state.filter.q) +
       '"></label><label>Modality<select id="modality"><option value="">All modalities</option>' +
@@ -241,7 +239,7 @@
         "A shared opportunity to grow.",
         "STEP welcomes eligible APO members and their families.",
       ) +
-      '<div class="detail-grid"><section class="panel"><h2>Eligible participants</h2><ul class="checklist"><li>APO members who are OFWs or Former OFWs.</li><li>Their parents, children, siblings, or spouses.</li></ul><h2>Before you apply</h2><p>Have the qualifying APO member’s membership number ready. Staff will check membership manually. Family applicants also provide their relationship and the member’s identifying information.</p><p>You may submit as many applications as you wish for available courses. Submit one application per course offering.</p></section><aside class="panel"><h2>' +
+      '<div class="detail-grid"><section class="panel"><h2>Eligible participants</h2><ul class="checklist"><li>APO members who are OFWs or Former OFWs.</li><li>APO members who are parents, children, siblings, or spouses of an OFW or Former OFW.</li></ul><h2>Before you apply</h2><p>Have your own APO Chapter, Batch Year and ID ready. Every applicant must be an APO member; staff will verify membership manually. Family applicants provide their OFW relative’s information. The OFW relative does not need to be an APO member.</p><p>You may submit as many applications as you wish for available courses. Submit one application per course offering.</p></section><aside class="panel"><h2>' +
       (offering() ? esc(offering().courseName) : "Start with a course") +
       '</h2><p class="muted">' +
       (offering()
@@ -386,6 +384,24 @@
       if (!result.ok) throw new Error(result.message);
       state.offerings = result.offerings;
       state.settings = result.settings;
+      document.getElementById("developmental-year").textContent =
+        "Developmental Year " +
+        (state.settings.developmentalYear || "2026 - 2027");
+      var number = String(state.settings.whatsAppNumber || "");
+      document.querySelectorAll("[data-whatsapp]").forEach(function (link) {
+        link.hidden =
+          !state.settings.whatsAppEnabled || !/^[1-9][0-9]{6,14}$/.test(number);
+        if (!link.hidden) link.href = "https://wa.me/" + number;
+        if (link.id === "whatsapp-footer") {
+          link.parentElement.hidden = link.hidden;
+          link.textContent =
+            number === "639927110929" ? "+63 992 711 0929" : "+" + number;
+          link.setAttribute(
+            "aria-label",
+            "Chat on WhatsApp at " + link.textContent + " (opens a new tab)",
+          );
+        }
+      });
       StepOptions.configure(result.configuration);
       var notice = document.getElementById("notice");
       if (!state.settings.registrationEnabled || window.STEP_PREVIEW) {

@@ -23,7 +23,7 @@ function valid() {
     goal: "goal-0",
     offeringId: catalog[0].id,
     consent: true,
-    consentVersion: "STEP-2026-03",
+    consentVersion: "STEP-2026-04",
   };
 }
 module.exports = { valid };

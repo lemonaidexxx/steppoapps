@@ -80,7 +80,7 @@ function setup_() {
   var p = PropertiesService.getScriptProperties();
   if (!p.getProperty("TOKEN_SECRET"))
     p.setProperty("TOKEN_SECRET", Utilities.getUuid() + Utilities.getUuid());
-  migrateV3_();
+  migrateV4_();
 }
 function seed_(name, rows) {
   var sheet = spreadsheet_().getSheetByName(name);

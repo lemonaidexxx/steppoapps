@@ -11,7 +11,7 @@ function server() {
       ["Key", "Value"],
       ["PrivacyContact", "privacy@example.invalid"],
       ["RetentionPeriod", "Through December 31, 2026"],
-      ["ConsentVersion", "STEP-2026-03"],
+      ["ConsentVersion", "STEP-2026-04"],
       ["RegistrationEnabled", "true"],
       ["Environment", "production"],
       ["OtherProgramsConsentVersion", "APO-OTHER-2026-01"],

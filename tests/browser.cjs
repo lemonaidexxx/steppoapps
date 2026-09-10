@@ -23,6 +23,7 @@ const assert = require("node:assert/strict");
   await page.locator("#continue-checkpoint").click();
   assert.equal(await page.evaluate(() => document.activeElement.id), "chapter");
   assert.equal(await page.locator("#voucher").count(), 0);
+  assert.equal(await page.locator("#whatsapp-contact").getAttribute("href"), "https://wa.me/639927110929");
   const fill = async (values, prefix = "") => {
     for (const [id, value] of Object.entries(values)) {
       const el = page.locator("#" + prefix + id);
@@ -98,6 +99,7 @@ const assert = require("node:assert/strict");
     await page.evaluate(() => document.activeElement.id),
     "review-title",
   );
+  assert.equal(await page.locator("#whatsapp-contact").isVisible(), false);
   assert.match(await page.locator("#review-content").innerText(), /001234/);
   await page.locator('[data-edit="checkpoint"]').click();
   assert.equal(await page.locator("dialog[open]").count(), 1);

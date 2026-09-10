@@ -93,7 +93,7 @@ var StepCore = (function () {
     ),
     field(
       "relationship",
-      "Relationship to the APO member",
+      "Your relationship to the OFW",
       "Relationship to OFW",
       "select",
       true,
@@ -103,7 +103,7 @@ var StepCore = (function () {
     ),
     field(
       "ofwFirstName",
-      "APO member’s first name",
+      "OFW relative’s first name",
       "OFW First Name",
       "text",
       true,
@@ -113,7 +113,7 @@ var StepCore = (function () {
     ),
     field(
       "ofwMiddleName",
-      "APO member’s middle name",
+      "OFW relative’s middle name",
       "OFW Middle Name",
       "text",
       false,
@@ -123,7 +123,7 @@ var StepCore = (function () {
     ),
     field(
       "ofwLastName",
-      "APO member’s last name",
+      "OFW relative’s last name",
       "OFW Last Name",
       "text",
       true,
@@ -133,7 +133,7 @@ var StepCore = (function () {
     ),
     field(
       "ofwBirthDate",
-      "APO member’s date of birth",
+      "OFW relative’s date of birth",
       "OFW Date of Birth",
       "date",
       true,
@@ -295,6 +295,9 @@ var StepCore = (function () {
     )
       f.section = "checkpoint";
     if (["country", "province", "city"].indexOf(f.id) >= 0) f.type = "select";
+    if (f.id === "relationship")
+      f.hint =
+        "Choose your relationship to the OFW: for example, select Child if you are their child.";
     if (f.id === "province") f.label = "Province / area";
     if (/Name$/.test(f.id)) {
       var part = /First|^first/.test(f.id)
@@ -304,9 +307,7 @@ var StepCore = (function () {
           : "Last Name";
       f.hint =
         "Enter " +
-        (f.id.indexOf("ofw") === 0
-          ? "your qualifying APO member’s "
-          : "your ") +
+        (f.id.indexOf("ofw") === 0 ? "your OFW relative’s " : "your ") +
         part +
         " exactly as shown on " +
         (f.id.indexOf("ofw") === 0 ? "their" : "your") +
@@ -316,6 +317,7 @@ var StepCore = (function () {
   extraHeaders = extraHeaders.concat([
     "Selection Keys",
     "Configuration Version",
+    "Membership Details Belong To",
   ]);
   function sectionFor(f, d) {
     return ["country", "occupation"].indexOf(f.id) >= 0
@@ -327,13 +329,13 @@ var StepCore = (function () {
   function labelFor(f, d) {
     if (f.id === "country")
       return d.category === "family"
-        ? "Your qualifying APO member’s country of deployment"
+        ? "Your OFW relative’s country of deployment"
         : "Your country of deployment";
     if (f.id === "occupation")
       return d.category === "family"
-        ? "Your qualifying APO member’s overseas occupation"
+        ? "Your OFW relative’s overseas occupation"
         : "Your overseas occupation";
-    return f.label.replace("APO member’s", "Your qualifying APO member’s");
+    return f.label.replace(/^OFW relative’s/, "Your OFW relative’s");
   }
   function legacyClean(input) {
     var d = {};
@@ -361,7 +363,7 @@ var StepCore = (function () {
   var sections = [
     { id: "checkpoint", label: "APO membership and applicant classification" },
     { id: "personal-information", label: "Personal information" },
-    { id: "ofw-details", label: "Your qualifying APO member’s information" },
+    { id: "ofw-details", label: "Your OFW relative’s information" },
     { id: "address", label: "Philippine address" },
     { id: "training-goals", label: "Training goals" },
     { id: "consent", label: "Privacy & consent" },

@@ -20,3 +20,9 @@
 ## Owner rollout remains pending
 
 Upload all generated Apps Script files, authorize Gmail, install owner triggers and deploy against an isolated test Sheet. Anonymous submission and real confirmation delivery must pass before opening production. No live deployment or email was performed here; local previews use synthetic data and mocks do not prove Google authorization, quotas or actual concurrent execution. See deployment.md.
+
+## V4 membership and WhatsApp update
+
+33 automated tests now pass, including applicant membership versus OFW-relative storage, historical blanks in the new column, repeatable migration, staff contact-setting preservation, and stale v3 consent rejection. Browser checks at 1440/768/390 pixels verified the relationship row spans the form/editor grid, relative labels, preserved answers after classification changes, no horizontal overflow, and hidden relative fields for OFW applicants. WhatsApp links resolve to https://wa.me/639927110929 with no personal data; the floating button hides during review/editor/privacy dialogs and does not overlap the review action. Keyboard privacy opening and Escape restore focus. No automatic WhatsApp message was sent.
+
+The live Sheet now has Applications!BJ1 = Membership Details Belong To (62 headers). Settings!A14:B16 contains the developmental year and WhatsApp configuration; B6 contains STEP-2026-04. All written cells and formatting were read back. RegistrationEnabled and EmailEnabled remain false. Historical records were untouched; native rendered Sheet inspection remains unavailable. Owner deployment and isolated live testing are still pending.

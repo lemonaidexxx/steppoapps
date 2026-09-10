@@ -59,8 +59,8 @@ test("migration preserves historical fields and extra/reordered columns; repeate
           : "",
   );
   s.sheets.Applications.push(old.slice());
-  s.ctx.migrateV3_();
-  s.ctx.migrateV3_();
+  s.ctx.migrateV4_();
+  s.ctx.migrateV4_();
   assert.equal(
     s.sheets.Settings.find((r) => r[0] === "EmailEnabled")[1],
     "false",
@@ -79,7 +79,7 @@ test("migration preserves historical fields and extra/reordered columns; repeate
 test("duplicate headers fail closed", () => {
   const s = server();
   s.sheets.Applications[0].push("Sex");
-  assert.throws(() => s.ctx.migrateV3_());
+  assert.throws(() => s.ctx.migrateV4_());
   assert.equal(s.ctx.submitApplication(s.request()).ok, false);
 });
 test("confirmation sends once with limited data and committee reply-to", () => {

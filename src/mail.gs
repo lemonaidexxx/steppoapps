@@ -38,7 +38,9 @@ function confirmationMessage_(record) {
       record.Hours +
       "\nLocation: " +
       record.City +
-      "\n\nEach class requires 25 learners before training can begin. Please keep your phone lines open and check your email regularly for updates.\n\nAlpha Phi Omega Philippines, Inc.\nDistrict Year 2026–2027\nCommittee on Training and Skills Development\nCommittee on Members’ Welfare and Development\n\nFor assistance, reply to this message.\nPrivacy requests: apocmwd2026.2027@gmail.com",
+      "\n\nEach class requires 25 learners before training can begin. Please keep your phone lines open and check your email regularly for updates.\n\nAlpha Phi Omega Philippines, Inc.\nDevelopmental Year " +
+      (settings_().DevelopmentalYear || "2026 - 2027") +
+      "\nCommittee on Training and Skills Development\nCommittee on Members’ Welfare and Development\n\nFor assistance, reply to this message.\nPrivacy requests: apocmwd2026.2027@gmail.com",
   };
 }
 function processEmailQueue_() {

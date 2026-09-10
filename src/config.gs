@@ -141,3 +141,30 @@ function publicConfiguration_(config) {
     }),
   };
 }
+
+function migrateV4_() {
+  migrateV3_();
+  var lock = LockService.getScriptLock();
+  lock.waitLock(10000);
+  try {
+    var sheet = spreadsheet_().getSheetByName("Settings"),
+      rows = sheet.getDataRange().getValues();
+    var values = {
+      DevelopmentalYear: "2026 - 2027",
+      WhatsAppNumber: "639927110929",
+      WhatsAppEnabled: "true",
+      ConsentVersion: "STEP-2026-04",
+    };
+    Object.keys(values).forEach(function (key) {
+      var i = rows.findIndex(function (r) {
+        return r[0] === key;
+      });
+      if (i < 0) sheet.appendRow([key, values[key]]);
+      else if (key === "ConsentVersion")
+        sheet.getRange(i + 1, 2).setValue(values[key]);
+    });
+    SpreadsheetApp.flush();
+  } finally {
+    lock.releaseLock();
+  }
+}

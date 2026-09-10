@@ -73,6 +73,10 @@ function getPublicData() {
       settings: {
         programName: s.ProgramName,
         districtYear: s.DistrictYear,
+        developmentalYear: s.DevelopmentalYear || "2026 - 2027",
+        whatsAppNumber: String(s.WhatsAppNumber || ""),
+        whatsAppEnabled:
+          s.WhatsAppEnabled === true || s.WhatsAppEnabled === "true",
         privacyContact: s.PrivacyContact,
         retentionPeriod: s.RetentionPeriod,
         consentVersion: s.ConsentVersion,
@@ -299,6 +303,7 @@ function submitApplication(request) {
           ),
         ),
         "Configuration Version": config.version,
+        "Membership Details Belong To": "Applicant",
       };
     StepCore.fields.forEach(function (f) {
       record[f.column] =
