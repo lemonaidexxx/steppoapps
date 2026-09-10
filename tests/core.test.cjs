@@ -4,15 +4,18 @@ const Core = require("../src/core.js");
 const catalog = require("../data/catalog.json");
 function valid() {
   return {
+    chapter: "Alpha",
+    batchYear: "2000",
+    otherProgramsConsentVersion: "APO-OTHER-2026-01",
     firstName: "Test",
     lastName: "Applicant",
     birthDate: "1990-01-01",
-    sex: "Prefer not to say",
+    sex: "Male",
     phone: "+63 917 000 0000",
     email: "test@example.invalid",
-    category: "APO Member",
+    category: "OFW",
     ofwStatus: "Former OFW",
-    membershipNumber: "TEST-123",
+    membershipNumber: "00123",
     country: "Seabased OFW",
     occupation: "Test occupation",
     region: "National Capital Region",
@@ -22,7 +25,7 @@ function valid() {
     goal: "Find jobs in the Philippines.",
     offeringId: catalog[0].id,
     consent: true,
-    consentVersion: "STEP-2026-01",
+    consentVersion: "STEP-2026-02",
   };
 }
 module.exports = { valid };
@@ -45,7 +48,7 @@ test("member categories, family conditions and hidden values", () => {
       Core.validate({ ...valid(), ofwStatus: status }).errors,
       {},
     );
-  let d = { ...valid(), category: "Family Member" };
+  let d = { ...valid(), category: "OFW family member" };
   assert.ok(Core.validate(d).errors.relationship);
   for (const relationship of ["Parent", "Child", "Sibling", "Spouse"])
     assert.deepEqual(

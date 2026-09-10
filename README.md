@@ -2,7 +2,7 @@
 
 Skills. Training. Empowerment. Progress. District Year 2026–2027.
 
-An accessible, mobile-friendly course catalog and application flow for Alpha Phi Omega Philippines, Inc., jointly administered by CTSD and CMWD. Source lives in GitHub; Google Apps Script serves the website and writes to a private Google Sheet. No participant sign-in, analytics, or emails.
+An accessible, responsive course catalog and continuous application form for Alpha Phi Omega Philippines, Inc., jointly administered by the Committee on Training and Skills Development and the Committee on Members’ Welfare and Development. Google Apps Script serves the website, writes to a private Google Sheet, and queues confirmation emails through the deployment owner’s Gmail. No participant sign-in or analytics.
 
 ## Local development
 
@@ -31,8 +31,8 @@ Run `python scripts/import-catalog.py path/to/catalog.xlsx` with Python and open
 
 ## Privacy and operations
 
-Production starts closed. Replace `[APO PRIVACY CONTACT EMAIL]` and `[APPLICATION RETENTION PERIOD]`, approve the privacy notice, then explicitly open registration after test deployment. Placeholder checks also run on the server. Only authorized staff should access Applications. No secrets or participant records belong in this public repository.
+Production starts closed, with email sending disabled. The supplied logo, privacy contact and December 31, 2026 retention cutoff are configured. The owner must authorize GmailApp, install private worker triggers, deploy and run an isolated live test before explicitly opening registration. See [deployment instructions](docs/deployment.md). Only authorized staff should access Applications. No secrets or participant records belong in this public repository.
 
 Applications are independent records. Learner ID is reserved and blank until staff establishes identity. One qualifying membership number may identify multiple family applicants. Duplicate hints never delete, merge, or expose records to applicants. Staff review does not automatically confirm enrollment.
 
-Known v1 boundaries: Apps Script quotas and account deployment policy apply; honeypots/tokens are basic abuse controls, not comprehensive bot protection. Geographic text fields avoid an external lookup dependency. No provider schedules, street addresses, live capacity, verification API, or certification claims are invented. Privacy contact/retention and the approved APO logo remain owner-supplied configuration.
+The form includes passport-name instructions, numeric APO IDs, separate required/optional consent, sticky section navigation, a native review dialog, and a modal editing drawer. Classes require 25 learners; this is program information, not a live capacity counter. Apps Script quotas and account deployment policy apply. Geographic fields use text inputs. Uncertain email outcomes go to staff review rather than automatic resend. Retention flags never delete records automatically.

@@ -20,6 +20,7 @@ function setup_() {
     var sheet = ss.getSheetByName(name) || ss.insertSheet(name),
       heads = defs[name];
     if (sheet.getLastRow() > 0) {
+      if (name === "Applications") return; // migrateV2_ validates and appends by header name.
       var old = sheet.getRange(1, 1, 1, heads.length).getValues()[0];
       if (JSON.stringify(old) !== JSON.stringify(heads))
         throw new Error(
@@ -68,15 +69,18 @@ function setup_() {
   seed_("Settings", [
     ["ProgramName", "SKILLS. TRAINING. EMPOWERMENT. PROGRESS."],
     ["DistrictYear", "2026–2027"],
-    ["PrivacyContact", "[APO PRIVACY CONTACT EMAIL]"],
-    ["RetentionPeriod", "[APPLICATION RETENTION PERIOD]"],
-    ["ConsentVersion", "STEP-2026-01"],
+    ["PrivacyContact", "apocmwd2026.2027@gmail.com"],
+    ["RetentionPeriod", "Through December 31, 2026"],
+    ["ConsentVersion", "STEP-2026-02"],
+    ["OtherProgramsConsentVersion", "APO-OTHER-2026-01"],
+    ["EmailEnabled", "false"],
     ["RegistrationEnabled", "false"],
     ["Environment", "production"],
   ]);
   var p = PropertiesService.getScriptProperties();
   if (!p.getProperty("TOKEN_SECRET"))
     p.setProperty("TOKEN_SECRET", Utilities.getUuid() + Utilities.getUuid());
+  migrateV2_();
 }
 function seed_(name, rows) {
   var sheet = spreadsheet_().getSheetByName(name);

@@ -223,10 +223,77 @@ var StepCore = (function () {
     "Source",
     "Payload Hash",
   ];
+  // Keep the v1 storage contract, including retired columns, for existing records.
+  var legacyHeaders = systemHeaders.concat(
+    fields.map(function (f) {
+      return f.column;
+    }),
+  );
+  fields = fields.filter(function (f) {
+    return f.id !== "voucher";
+  });
+  fields.forEach(function (f) {
+    if (f.id === "sex") f.options = ["Male", "Female"];
+    if (f.id === "category") f.options = ["OFW", "OFW family member"];
+    if (f.id === "membershipNumber")
+      f.label = "APO ID number (numeric part only)";
+    f.section =
+      f.step === 0
+        ? "passport-details"
+        : f.step === 2
+          ? "address"
+          : f.step === 3
+            ? "training-goals"
+            : "ofw-details";
+    if (f.id === "category" || f.id === "ofwStatus")
+      f.section = "classification";
+    if (f.id === "membershipNumber") f.section = "apo-details";
+    if (
+      /^(firstName|middleName|lastName|ofwFirstName|ofwMiddleName|ofwLastName)$/.test(
+        f.id,
+      )
+    )
+      f.hint = "Enter exactly as shown on your passport.";
+  });
+  var chapter = field("chapter", "Chapter", "Chapter", "text", true, 0),
+    batch = field("batchYear", "Batch (year)", "Batch Year", "text", true, 0);
+  chapter.section = batch.section = "apo-details";
+  var membership = fields.find(function (f) {
+    return f.id === "membershipNumber";
+  });
+  fields = [chapter, batch, membership].concat(
+    fields.filter(function (f) {
+      return f !== membership;
+    }),
+  );
+  var extraHeaders = [
+    "Chapter",
+    "Batch Year",
+    "Other Programs Consent",
+    "Other Programs Consent Version",
+    "Other Programs Consent Recorded At",
+    "Retention Cutoff",
+    "Retention Review",
+    "Email Status",
+    "Email Attempts",
+    "Email Last Attempt At",
+    "Email Sent At",
+    "Email Next Attempt At",
+    "Email Error",
+  ];
+  var sections = [
+    { id: "apo-details", label: "APO member details" },
+    { id: "classification", label: "Applicant classification" },
+    { id: "passport-details", label: "Passport details" },
+    { id: "ofw-details", label: "OFW / family information" },
+    { id: "address", label: "Philippine address" },
+    { id: "training-goals", label: "Training goals" },
+    { id: "consent", label: "Privacy & consent" },
+  ];
   function visible(f, d) {
     return (
       !f.condition ||
-      (f.condition === "family" && d.category === "Family Member") ||
+      (f.condition === "family" && d.category === "OFW family member") ||
       (f.condition === "otherGoal" && d.goal === goals[4])
     );
   }
@@ -240,6 +307,11 @@ var StepCore = (function () {
     });
     d.offeringId = typeof input.offeringId === "string" ? input.offeringId : "";
     d.consent = input.consent === true;
+    d.otherProgramsConsent = input.otherProgramsConsent === true;
+    d.otherProgramsConsentVersion =
+      typeof input.otherProgramsConsentVersion === "string"
+        ? input.otherProgramsConsentVersion
+        : "";
     d.consentVersion =
       typeof input.consentVersion === "string" ? input.consentVersion : "";
     return d;
@@ -248,13 +320,23 @@ var StepCore = (function () {
     var d = clean(input),
       errors = {};
     fields.forEach(function (f) {
-      if ((step !== undefined && f.step !== step) || !visible(f, d)) return;
+      if (
+        (step !== undefined &&
+          (typeof step === "string" ? f.section !== step : f.step !== step)) ||
+        !visible(f, d)
+      )
+        return;
       var v = d[f.id];
       if (f.required && !v)
         errors[f.id] = "Enter " + f.label.toLowerCase() + ".";
       else if (v.length > 300) errors[f.id] = "Use 300 characters or fewer.";
       else if (v && f.options && f.options.indexOf(v) < 0)
         errors[f.id] = "Select a listed option.";
+      else if (f.id === "batchYear" && !/^\d{4}$/.test(v))
+        errors[f.id] = "Enter a four-digit batch year.";
+      else if (f.id === "membershipNumber" && !/^\d+$/.test(v))
+        errors[f.id] =
+          "Enter only the numeric part of the APO ID; keep any leading zeros.";
       else if (v && f.type === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v))
         errors[f.id] = "Enter a valid email address.";
       else if (
@@ -311,11 +393,9 @@ var StepCore = (function () {
   }
   return {
     fields: fields,
-    headers: systemHeaders.concat(
-      fields.map(function (f) {
-        return f.column;
-      }),
-    ),
+    headers: legacyHeaders.concat(extraHeaders),
+    legacyHeaders: legacyHeaders,
+    sections: sections,
     visible: visible,
     clean: clean,
     validate: validate,

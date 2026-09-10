@@ -10,11 +10,22 @@ let html = read("src/index.html")
   .replace("/* APP_CSS */", () => read("src/styles.css"))
   .replace("/* CORE_JS */", () => read("src/core.js"))
   .replace("/* APP_JS */", () => read("src/app.js"));
+html = html
+  .replace("/* REGISTRATION_JS */", () => read("src/registration.js"))
+  .replaceAll(
+    "APO_LOGO_DATA",
+    "data:image/png;base64," +
+      fs
+        .readFileSync(path.join(root, "assets/apo-logo.png"))
+        .toString("base64"),
+  );
 fs.mkdirSync(path.join(root, "dist"), { recursive: true });
 fs.writeFileSync(path.join(root, "dist/Index.html"), html);
 fs.writeFileSync(path.join(root, "dist/Core.gs"), read("src/core.js"));
 fs.writeFileSync(path.join(root, "dist/Server.gs"), read("src/server.gs"));
 fs.writeFileSync(path.join(root, "dist/Setup.gs"), read("src/setup.gs"));
+fs.writeFileSync(path.join(root, "dist/Mail.gs"), read("src/mail.gs"));
+fs.writeFileSync(path.join(root, "dist/Migrate.gs"), read("src/migrate.gs"));
 fs.writeFileSync(
   path.join(root, "dist/Catalog.gs"),
   "var CATALOG_SEED = " + JSON.stringify(catalog) + ";\n",

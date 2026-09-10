@@ -43,6 +43,7 @@ function live_(s) {
     !!String(s.PrivacyContact || "").trim() &&
     !!String(s.RetentionPeriod || "").trim() &&
     !!String(s.ConsentVersion || "").trim() &&
+    !!String(s.OtherProgramsConsentVersion || "").trim() &&
     !/[\[\]]/.test(s.PrivacyContact + s.RetentionPeriod) &&
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s.PrivacyContact)
   );
@@ -75,6 +76,7 @@ function getPublicData() {
         privacyContact: s.PrivacyContact,
         retentionPeriod: s.RetentionPeriod,
         consentVersion: s.ConsentVersion,
+        otherProgramsConsentVersion: s.OtherProgramsConsentVersion,
         registrationEnabled: live_(s),
       },
     };
@@ -145,7 +147,8 @@ function hash_(data) {
   );
 }
 function literal_(value) {
-  return typeof value === "string" && /^[\s]*[=+@\-]/.test(value)
+  return typeof value === "string" &&
+    (/^[\s]*[=+@\-]/.test(value) || /^\d+$/.test(value))
     ? "'" + value
     : value;
 }
@@ -222,7 +225,10 @@ function submitApplication(request) {
         message:
           "Applications are not open yet. Your answers have been preserved.",
       };
-    if (data.consentVersion !== s.ConsentVersion)
+    if (
+      data.consentVersion !== s.ConsentVersion ||
+      data.otherProgramsConsentVersion !== s.OtherProgramsConsentVersion
+    )
       return {
         ok: false,
         code: "CONSENT_CHANGED",
@@ -271,20 +277,28 @@ function submitApplication(request) {
         "Duplicate Registration IDs": matches.join(", "),
         Source: "APO STEP Web",
         "Payload Hash": payloadHash,
+        "Other Programs Consent": data.otherProgramsConsent,
+        "Other Programs Consent Version": s.OtherProgramsConsentVersion,
+        "Other Programs Consent Recorded At": now,
+        "Retention Cutoff": "2026-12-31",
+        "Retention Review":
+          now >= "2026-12-31T16:00:00.000Z"
+            ? "Due for staff review"
+            : "Not due",
+        "Email Status": "Pending",
+        "Email Attempts": 0,
       };
     StepCore.fields.forEach(function (f) {
       record[f.column] = data[f.id];
     });
-    if (data.category === "APO Member") {
+    if (data.category === "OFW") {
       record["OFW First Name"] = data.firstName;
       record["OFW Middle Name"] = data.middleName;
       record["OFW Last Name"] = data.lastName;
       record["OFW Date of Birth"] = data.birthDate;
     }
     var sheet = spreadsheet_().getSheetByName("Applications"),
-      heads = sheet.getRange(1, 1, 1, StepCore.headers.length).getValues()[0];
-    if (JSON.stringify(heads) !== JSON.stringify(StepCore.headers))
-      throw new Error("Schema mismatch");
+      heads = applicationHeaders_(sheet);
     sheet.getRange(sheet.getLastRow() + 1, 1, 1, heads.length).setValues([
       heads.map(function (h) {
         return literal_(record[h] === undefined ? "" : record[h]);

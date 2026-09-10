@@ -1,39 +1,51 @@
 # Deploy and operate APO STEP
 
-## 1. Google Sheet
+## Current state
 
-Destination: https://docs.google.com/spreadsheets/d/1_MmXK52Mgd3W_-tqCFFo-zozrLEhJ1dRbGOe2pJ90NI/edit
+Source is in GitHub. The private stepoapps sheet has the v2 schema and settings. RegistrationEnabled and EmailEnabled are false. No live deployment or confirmation email test has been completed.
 
-Keep Sheet1 intact. The application uses dedicated Courses, Offerings, Applications and Settings tabs. If these are already initialized by the repository setup, do not recreate or clear them. Otherwise `setup_` initializes them safely, checks headers, and seeds empty tabs. Preserve all Applications rows.
+Keep the spreadsheet restricted to authorized APO staff. Participants do not need Sheet access. Never publish Applications. Preserve existing tabs and records; setup/migration do not clear or recreate Sheet1. Sheet1 was absent at the September 10, 2026 v2 metadata check.
 
-Set spreadsheet General access to Restricted and grant only the authorized APO staff editor access. The Apps Script owner must retain access. Never publish Applications to the web. The website does not require participants to have spreadsheet access.
+## Owner project and authorization
 
-## 2. Apps Script project
+1. Sign in at https://script.google.com as the responsible deployment owner. Create a standalone Apps Script project, or use the existing owner project.
+2. Run `npm run build`. Copy all generated files from dist: Server.gs, Core.gs, Setup.gs, Migrate.gs, Mail.gs, Catalog.gs, Index.html and appsscript.json. Enable manifest display in Project Settings. Alternatively authenticate Google's clasp locally and use an ignored `.clasp.json` with `{"scriptId":"YOUR_SCRIPT_ID","rootDir":"dist"}`, then `clasp push`.
+3. Add Script property SPREADSHEET*ID. Production: `1_MmXK52Mgd3W*-tqCFFo-zozrLEhJ1dRbGOe2pJ90NI`. For testing use a separate blank spreadsheet. Run `setup*`for initialization or`migrateV2*` for an existing installation. Setup creates TOKEN_SECRET if absent. Never disclose this secret or rotate it during outstanding retries.
+4. Authorize the manifest scopes for Sheets, Gmail, mail quota checks, and trigger management. GmailApp uses Google's built-in Apps Script service; no API key or separate email provider is required. Gmail access is a broad OAuth scope. Review the scope screen while signed in as the intended owner.
+5. Run `installWorkers_` as the deployment owner. It idempotently installs a five-minute email worker and daily retention review trigger for that account. Installable triggers run as their creator, so do not let a different staff account install duplicate workers. Functions ending `_` are private to browser RPC.
 
-Create a standalone project at https://script.google.com while signed in as the responsible APO owner. Run `npm run build`. Copy `dist/Server.gs`, `Core.gs`, `Setup.gs`, `Catalog.gs`, `Index.html`, and `appsscript.json` into matching editor files. Enable display of the manifest in Project Settings before replacing it.
+The sender is the trigger/deployment owner's Gmail account, display name APO STEP, reply-to apocmwd2026.2027@gmail.com. That reply-to address does not become the sender. Google sending quotas apply; the built-in service is not unlimited. See [GmailApp.sendEmail](<https://developers.google.com/apps-script/reference/gmail/gmail-app#sendEmail(String,String,String,Object)>), [quotas](https://developers.google.com/apps-script/guides/services/quotas), and [installable triggers](https://developers.google.com/apps-script/guides/triggers/installable).
 
-For command-line deployment, install Google's clasp CLI and authenticate locally. Create a local `.clasp.json` with `{"scriptId":"YOUR_SCRIPT_ID","rootDir":"dist"}` and run `clasp push`. `.clasp.json`, OAuth credentials, and generated files are ignored by git. Do not add a credential to a workflow or repository. Manual editor upload works without clasp.
+## Settings and migration
 
-In Project Settings → Script properties, add `SPREADSHEET_ID` with the destination ID. Run `setup_` from the editor and authorize Sheets access. It creates a random TOKEN_SECRET if missing; never copy that value into frontend files. Functions ending in an underscore cannot be called with google.script.run.
+| Key                         | Production value                       |
+| --------------------------- | -------------------------------------- |
+| PrivacyContact              | apocmwd2026.2027@gmail.com             |
+| RetentionPeriod             | Through December 31, 2026              |
+| ConsentVersion              | STEP-2026-02                           |
+| OtherProgramsConsentVersion | APO-OTHER-2026-01                      |
+| RegistrationEnabled         | false until rollout passes             |
+| EmailEnabled                | false until isolated email test passes |
+| Environment                 | production                             |
 
-## 3. Test in isolation
+`migrateV2_` validates legacy header names, rejects missing/duplicate/blank headers, and appends only missing v2 columns. Existing order and extra columns are supported. Historical voucher, Sex, applications, and catalog IDs are preserved. Historical blank email states are not queued. Migration explicitly closes registration and email sending; replacing privacy values never opens either switch.
 
-Create a separate blank test spreadsheet and a separate Apps Script project. Point its SPREADSHEET_ID to the test sheet, run setup_, and use only synthetic participants. In its Settings, use `privacy@example.invalid`, `Synthetic test data; delete after testing`, and set RegistrationEnabled to true. Keep Environment as production so the real guard path is exercised. These test values must never be used in the real destination.
+## Isolated live test, then rollout
 
-Deploy → New deployment → Web app. Execute as the owner. Choose Anyone (anonymous), not only signed-in Google users. Open the `/exec` URL in a signed-out browser. If Anyone is unavailable, the account's administrator must permit anonymous web apps or an eligible APO owner account is needed; do not substitute a login-required deployment.
+Use a separate test Sheet and Apps Script project with synthetic personal details. Use an email inbox the owner controls for the confirmation recipient. Run setup and install triggers there; enable RegistrationEnabled and EmailEnabled only in the test sheet. Keep Environment=production to exercise the real transport and guards.
 
-Check course browsing, all applicant/relationship branches, review/back edits, confirmation, and the resulting Applications row. Double-click and retry the same request: it must produce one row. Submit another application with matching synthetic email: both records remain and the later row is flagged. Test closed registration and disabled offerings. Verify that a browser cannot retrieve Applications or invoke setup_. Local mocks do not replace this live check.
+Deploy → New deployment → Web app, execute as the owner, access Anyone (anonymous). If anonymous access is unavailable, the Google account administrator or an eligible owner account is needed. Open the /exec URL signed out and test member/family branches, conditional fields, numeric ID 001234, review edits, and a saved receipt. Verify the row remains saved if sending fails. Run `processEmailQueue_` manually or wait for its trigger; verify exactly one message arrives with the expected sender, reply-to, committees and course facts, and Email Status becomes Sent. Retry the original submission: same receipt, no second row or message. A separate duplicate stays recorded and flagged. Check that browser RPC cannot invoke private helpers or read Applications.
 
-## 4. Production activation
+Only after those checks deploy the production project, install owner triggers, and explicitly set EmailEnabled=true and RegistrationEnabled=true. Verify the public URL signed out. The local preview uses synthetic data and never sends mail or writes Sheets; mocks do not prove live Google authorization, delivery, quotas, or parallel execution.
 
-Replace the approved privacy contact and retention period in Settings. Review the consent prose in src/app.js with the responsible APO program owner and update ConsentVersion when changing its meaning. Supply the approved APO logo; the current wordmark is a placeholder, not an official seal. Confirm the intended treatment of any family applicants who are minors before opening to that audience; there is no automated age gate.
+## Email queue and recovery
 
-Keep Environment=production. After isolated testing and privacy approval, set RegistrationEnabled=true. The server still rejects unresolved privacy placeholders. Deploy an owner-executed anonymous web app and verify the public URL while signed out. Do not link the private spreadsheet publicly.
+New applications save Pending before any send. The worker holds the script lock through a batch of at most five messages. It saves Sending before Gmail and Sent after success. Submission retries return the existing receipt, leaving its one queue entry unchanged.
 
-## 5. Updates and rollback
+Known quota failures use Retry with a 24-hour delay and at most three automatic attempts. Invalid recipients and exhausted attempts become Needs review. Interrupted Sending or uncertain send exceptions become Needs review; they are never blindly resent. Email failure does not change a saved registration into a failure. Inspect Email Attempts, Last Attempt At, Sent At, Next Attempt At, and Error privately. For Needs review, reconcile the registration reference with the owner's Sent mailbox first. If found, mark Sent; only after confirming no message was sent may staff reset to Pending and clear retry timing/attempts. Manual reconciliation is necessary because Gmail and Sheets do not offer one shared atomic transaction.
 
-Keep published versions: edit the existing deployment to use a new version, retaining its URL. If a release fails, set RegistrationEnabled=false and switch the deployment to the prior version. Do not delete Applications or rotate TOKEN_SECRET during retries: rotation invalidates outstanding signed tokens. Never use deployment rollback to roll back application records.
+## Retention and updates
 
-Review Apps Script execution failures and quotas through the owner's console; logs intentionally omit request payloads. Review duplicate flags privately. Close registrations during sustained failures or abusive traffic. A lost response can be retried using the same token and payload for the original receipt, even if the token expires after the write. An expired token with no saved application can be refreshed. For a changed privacy notice, copy your answers before reloading; the app never persists personal data to browser storage.
+Retention ends December 31, 2026, Philippine time. The daily worker flags records Due for staff review from January 1, 2027. It never deletes records or extends consent. The optional other-program choice uses the same cutoff. Staff must resolve retention and privacy requests; a flag is not permission to retain indefinitely.
 
-Stored timestamps are ISO UTC. Staff may use a separate view for local-time reporting. Review Status starts Pending review; staff may use Approved, Declined, Needs follow-up, or Withdrawn as their process requires. Set Updated At when manually changing a record. No automatic learner merging or retention deletion is enabled.
+For updates build and upload all files, run migration if needed, and edit the existing deployment to a new version. Migration closes both switches, so reopen only after verification. On release failure, close both switches and select a previously validated schema-compatible version. V1 is not compatible with v2 consent/headers. Never roll back application data. Preserve tokens for uncertain-response retries. All stored timestamps are ISO UTC. Update consent versions when purposes change and require applicants to reload the notice; answers are not persisted in browser storage.

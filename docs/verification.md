@@ -1,22 +1,23 @@
-# Verification record
+# Verification record — v2, September 10, 2026
 
 ## Completed locally
 
-- 12 automated tests passed on the bundled Node runtime: catalog integrity, applicant categories, family relationships, dates, membership, consent, hidden-field cleanup, search, duplicate signals, idempotency, unavailable courses, placeholder guards, tampered/expired tokens, failed and uncertain writes, lock contention, oversized requests, honeypot, stale consent and formula-like text.
-- CUA browser inspection completed the synthetic family-member application: search Housekeeping, filter Manila, select institution, validate required fields, enter former-OFW details, reveal Other training goal, accept demo consent, review, and receive a DEMO receipt.
-- Returning to the catalog preserved search and city filters.
-- Desktop home and mobile home/catalog were visually inspected. At the mobile 390px viewport, document content did not overflow horizontally.
-- A catalog-filter/address-field collision was found and fixed by restricting form capture to the application form. The runnable browser regression test asserts that the address city starts empty.
-- The fixed address field was retested in the browser with an APO current-OFW applicant and remained empty despite filtering the catalog by Manila. A mobile form overflow was also fixed; the rebuilt form measured 375px content within a 390px viewport.
-- Apps Script build completed. Repository whitespace checks passed.
+- 20 automated tests pass: all 139 offerings / 53 titles; category and conditional validation; four-digit batch and digits-only IDs preserving zeros; passport spelling; removed voucher and restricted new Sex values; optional consent; idempotent receipts; duplicate safeguards; tampered/expired tokens; unavailable offerings; failed/uncertain writes; size/honeypot/formula guards; private helper isolation.
+- Mock Sheets/Gmail checks cover reordered and extra columns, historical voucher/Sex preservation, idempotent migration, disabled switches, one queued confirmation, bounded quota retries, uncertain sends/post-send writes routed to review, retention cutoff and idempotent trigger setup.
+- CUA browser testing completed synthetic family and member applications, including optional consent declined and accepted. Both produced DEMO receipts; no Google writes or emails occurred.
+- Browser checks verified required-field focus, leading zeros and exact names in review, preserved answers across section fragment navigation, conditional family/other-goal fields, drawer cancel/save, Escape and focus restoration. A category edit introducing missing family fields is revalidated before submission.
+- Desktop (1440), tablet (768), and mobile (390) layouts were inspected with the supplied logo. No horizontal document overflow appeared. Mobile header height and section offset were measured; the first/last-section indicators remain unique and the current mobile link scrolls into view.
+- Native modal focus wrapping was added after keyboard testing exposed Tab leaving the last drawer button. The rebuilt preview passed forward/reverse drawer wrapping and forward review wrapping; focus stayed inside the open modal.
+- The reproducible tests/browser.cjs was updated for the continuous form. Browser actions in this session were run through CUA, not that standalone script.
+- Apps Script build succeeds. Source and catalog stay separate from credentials and application records.
 
-## Google Sheet completed
+## Live Google Sheet
 
-- Created Courses, Offerings, Applications and Settings without changing Sheet1.
-- Read back all 139 offerings and the 46 Applications headers.
-- Confirmed RegistrationEnabled=false and both privacy placeholders.
-- Sharing metadata reports owner-only access. Header formatting and wrapping were checked through Sheets cell metadata; authenticated Google-rendered visual inspection was unavailable.
+- Read existing headers/settings before writing. Appended 13 columns to Applications (46 → 59), preserving original columns and all application rows. No historical values were rewritten and no historical emails were queued.
+- Read back AU1:BG1 and updated Settings: approved contact, December 31, 2026 retention, both consent versions, RegistrationEnabled=false and EmailEnabled=false.
+- Catalog tabs and offering IDs were untouched. Sheet1 was absent in current metadata and was not recreated. Existing sharing permissions were not changed.
+- New headers copied the prior header formatting. Authenticated Google-rendered visual inspection was unavailable; migration used bounded Sheets API reads/writes.
 
-## Still requires the owner session
+## Owner rollout remains pending
 
-The available browser reached the signed-out Apps Script landing page. No live Apps Script project or deployment was created, and no anonymous live submission test was run. Follow deployment.md to authorize the owner project, verify using a separate synthetic-data spreadsheet, then deploy. The local browser adapter does not prove live Google transport behavior or actual parallel Apps Script execution. Production remains closed.
+No live Apps Script project/deployment, Gmail authorization, owner worker trigger, anonymous submission, or real confirmation-delivery test was completed. Follow deployment.md using a separate test spreadsheet and an owner-controlled inbox before opening production. Mocks do not prove live Google authorization, quotas or concurrent execution. Registration and email sending remain disabled.

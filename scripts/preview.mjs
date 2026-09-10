@@ -2,7 +2,7 @@ import http from "node:http";
 import fs from "node:fs";
 import "./build.mjs";
 const catalog = JSON.parse(fs.readFileSync("data/catalog.json", "utf8"));
-const demo = `window.STEP_PREVIEW=async function(name,arg){if(name==='getPublicData')return {ok:true,offerings:${JSON.stringify(catalog)},settings:{districtYear:'2026–2027',privacyContact:'[APO PRIVACY CONTACT EMAIL]',retentionPeriod:'[APPLICATION RETENTION PERIOD]',consentVersion:'STEP-2026-01',registrationEnabled:false}};if(name==='issueSubmissionToken')return {ok:true,token:'local-demo'};if(name==='submitApplication'){var v=StepCore.validate(arg.data);return Object.keys(v.errors).length?{ok:false,errors:v.errors}:{ok:true,registrationId:'DEMO-'+crypto.randomUUID(),submittedAt:new Date().toISOString()};}};`;
+const demo = `window.STEP_PREVIEW=async function(name,arg){if(name==='getPublicData')return {ok:true,offerings:${JSON.stringify(catalog)},settings:{districtYear:'2026–2027',privacyContact:'apocmwd2026.2027@gmail.com',retentionPeriod:'Through December 31, 2026',consentVersion:'STEP-2026-02',otherProgramsConsentVersion:'APO-OTHER-2026-01',registrationEnabled:false}};if(name==='issueSubmissionToken')return {ok:true,token:'local-demo'};if(name==='submitApplication'){var v=StepCore.validate(arg.data);return Object.keys(v.errors).length?{ok:false,errors:v.errors}:{ok:true,registrationId:'DEMO-'+crypto.randomUUID(),submittedAt:new Date().toISOString()};}};`;
 const page = fs
   .readFileSync("dist/Index.html", "utf8")
   .replace("<script>", "<script>" + demo + "</script><script>");
