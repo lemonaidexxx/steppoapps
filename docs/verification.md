@@ -7,6 +7,7 @@
 - Returning to the catalog preserved search and city filters.
 - Desktop home and mobile home/catalog were visually inspected. At the mobile 390px viewport, document content did not overflow horizontally.
 - A catalog-filter/address-field collision was found and fixed by restricting form capture to the application form. The runnable browser regression test asserts that the address city starts empty.
+- The fixed address field was retested in the browser with an APO current-OFW applicant and remained empty despite filtering the catalog by Manila. A mobile form overflow was also fixed; the rebuilt form measured 375px content within a 390px viewport.
 - Apps Script build completed. Repository whitespace checks passed.
 
 ## Google Sheet completed

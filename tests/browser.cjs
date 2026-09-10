@@ -60,6 +60,9 @@ const fs = require("node:fs");
   });
   await page.getByRole("button", { name: "Continue" }).click();
   assert.equal(await page.locator("#city").inputValue(), "");
+  await page.setViewportSize({width:390,height:844});
+  assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+  await page.setViewportSize({width:1440,height:1050});
   await fill({
     region: "National Capital Region",
     province: "Metro Manila",

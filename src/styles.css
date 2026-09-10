@@ -514,6 +514,9 @@ p {
   gap: 35px;
   align-items: start;
 }
+.form-layout > *, .form-grid > *, .detail-grid > * {
+  min-width: 0;
+}
 .progress {
   margin: 0;
   padding: 0;
