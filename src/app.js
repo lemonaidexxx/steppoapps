@@ -159,9 +159,7 @@
     state.filter.page = Math.min(pages, state.filter.page);
     var start = (state.filter.page - 1) * 12;
     document.getElementById("results").innerHTML =
-      '<div class="results-info" role="status"><span>' +
-      rows.length +
-      ' course offerings</span><span>City-level locations</span></div><div class="grid">' +
+      '<div class="grid">' +
       rows
         .slice(start, start + 12)
         .map(card)
@@ -180,7 +178,8 @@
           '</span><button class="btn secondary" id="next" ' +
           (state.filter.page === pages ? "disabled" : "") +
           ">Next</button></div>"
-        : "");
+        : "") +
+      '<div class="results-info" role="status"><span>' + rows.length + (rows.length === 1 ? ' course offering' : ' course offerings') + '</span></div>';
     ["prev", "next"].forEach(function (id) {
       var el = document.getElementById(id);
       if (el)
@@ -234,8 +233,7 @@
   function whatsappHelp() {
     var number = String(state.settings.whatsAppNumber || "");
     if (!state.settings.whatsAppEnabled || !/^[1-9][0-9]{6,14}$/.test(number)) return "";
-    var label = number === "639927110929" ? "+63 992 711 0929" : "+" + number;
-    return '<section class="eligibility-contact" aria-labelledby="whatsapp-heading"><h2 id="whatsapp-heading">Questions about eligibility?</h2><p>Contact APO STEP on WhatsApp for assistance.</p><p>' + esc(label) + '</p><a id="whatsapp-contact" class="btn whatsapp-button" href="https://wa.me/' + number + '" target="_blank" rel="noopener noreferrer" aria-label="Chat on WhatsApp (opens a new tab)">Chat on WhatsApp ↗</a></section>';
+    return '<section class="eligibility-contact" aria-labelledby="whatsapp-heading"><h2 id="whatsapp-heading">Questions about eligibility?</h2><p>Contact APO STEP on WhatsApp for assistance.</p><a id="whatsapp-contact" class="btn whatsapp-button" href="https://wa.me/' + number + '" target="_blank" rel="noopener noreferrer" aria-label="Chat on WhatsApp (opens a new tab)">Chat on WhatsApp ↗</a></section>';
   }
   function eligibility() {
     return (
