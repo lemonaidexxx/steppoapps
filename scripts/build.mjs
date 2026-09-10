@@ -43,3 +43,12 @@ fs.writeFileSync(
   path.join(root, "dist/OptionSeed.gs"),
   "var OPTION_SEED = " + read("data/options.json") + ";\n",
 );
+
+// Manual deployment alternative: one server file prevents partial module uploads.
+const single = path.join(root, "dist", "single-file");
+fs.mkdirSync(single, { recursive: true });
+const serverFiles = ["Options.gs", "Core.gs", "Catalog.gs", "OptionSeed.gs", "Server.gs", "Mail.gs", "Migrate.gs", "Config.gs", "Setup.gs"];
+fs.writeFileSync(path.join(single, "Code.gs"), "/* Complete APO STEP server. Do not combine with the separate .gs files. */\n" + serverFiles.map(name => "\n/* ---- " + name + " ---- */\n" + read("dist/" + name)).join("\n"));
+fs.copyFileSync(path.join(root, "dist", "Index.html"), path.join(single, "Index.html"));
+fs.copyFileSync(path.join(root, "appsscript.json"), path.join(single, "appsscript.json"));
+console.log("Manual deployment bundle: dist/single-file (Code.gs, Index.html, appsscript.json).");

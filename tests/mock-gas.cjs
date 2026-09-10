@@ -5,7 +5,7 @@ const Core = require("../src/core.js"),
   catalog = require("../data/catalog.json"),
   { valid } = require("./fixtures.cjs");
 const seed = require("../data/options.json");
-function server() {
+function server(options = {}) {
   const sheets = {
     Settings: [
       ["Key", "Value"],
@@ -214,7 +214,7 @@ function server() {
     },
   });
   vm.runInContext(
-    [
+    options.bundle ? fs.readFileSync(options.bundle, "utf8") : [
       "src/options.js",
       "src/core.js",
       "src/server.gs",
@@ -226,7 +226,7 @@ function server() {
       .join("\n"),
     ctx,
   );
-  ctx.OPTION_SEED = JSON.parse(JSON.stringify(seed));
+  if (!options.bundle) ctx.OPTION_SEED = JSON.parse(JSON.stringify(seed));
   return {
     ctx,
     sheets,

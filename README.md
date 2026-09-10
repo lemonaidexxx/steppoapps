@@ -29,6 +29,10 @@ Open http://127.0.0.1:4173. The local preview is explicitly a synthetic-data dem
 
 Run `python scripts/import-catalog.py path/to/catalog.xlsx` with Python and openpyxl available, then test and build. The importer reads only `2 Unique Offerings`. IDs hash the exact source course title and offering fields; reordering does not change IDs. A changed offering gets a new ID. Keep older offerings in the live sheet and mark Selectable false instead of deleting historical references. `setup_` seeds only empty tabs and never overwrites populated catalogs.
 
+## Manual Apps Script upload
+
+After building, use `dist/single-file/Code.gs`, `Index.html` and `appsscript.json` for manual deployment. All server modules and seed data are combined in Code.gs. Do not combine it with the separate .gs files. See the temporary setup runner and deletion-before-deployment instructions in docs/deployment.md.
+
 ## Privacy and operations
 
 Production starts closed, with email sending disabled. The supplied logo, privacy contact and December 31, 2026 retention cutoff are configured. The owner must authorize GmailApp, install private worker triggers, deploy and run an isolated live test before explicitly opening registration. See [deployment instructions](docs/deployment.md). Only authorized staff should access Applications. No secrets or participant records belong in this public repository.

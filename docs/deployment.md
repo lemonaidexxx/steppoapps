@@ -9,10 +9,22 @@ Keep the spreadsheet restricted to authorized APO staff. Participants do not nee
 ## Owner project and authorization
 
 1. Sign in at https://script.google.com as the responsible deployment owner. Create a standalone Apps Script project, or use the existing owner project.
-2. Run `npm run build`. Copy all generated files from dist: Server.gs, Core.gs, Options.gs, Config.gs, OptionSeed.gs, Setup.gs, Migrate.gs, Mail.gs, Catalog.gs, Index.html and appsscript.json. Enable manifest display in Project Settings. Alternatively authenticate Google's clasp locally and use an ignored `.clasp.json` with `{"scriptId":"YOUR_SCRIPT_ID","rootDir":"dist"}`, then `clasp push`.
-3. Add Script property `SPREADSHEET_ID`. Production: `1_MmXK52Mgd3W_-tqCFFo-zozrLEhJ1dRbGOe2pJ90NI`. For testing use a separate blank spreadsheet. Run `setup_` for initialization or `migrateV4_` for an existing installation. Setup creates TOKEN_SECRET if absent. Never disclose this secret or rotate it during outstanding retries.
+2. Run `npm run build`. For manual copying, use **dist/single-file**: Code.gs, Index.html and appsscript.json. Replace all existing server .gs files with the single Code.gs; do not mix this bundle with Catalog.gs, Core.gs, Config.gs, Options.gs, OptionSeed.gs, Server.gs, Setup.gs, Mail.gs or Migrate.gs. Keep/replace Index.html and the manifest with their matching bundle files. This changes project code, not Sheet data or Script Properties. Enable manifest display in Project Settings. The original modular dist files remain available for clasp users; use only one layout per project.
+3. Add Script property `SPREADSHEET_ID`. Production: `1_MmXK52Mgd3W_-tqCFFo-zozrLEhJ1dRbGOe2pJ90NI`. For testing use a separate blank spreadsheet. Use the temporary runner below to initialize and install workers. Setup creates TOKEN_SECRET if absent and preserves populated data. Never disclose or rotate that secret during outstanding retries.
 4. Authorize the manifest scopes for Sheets, Gmail, mail quota checks, and trigger management. GmailApp uses Google's built-in Apps Script service; no API key or separate email provider is required. Gmail access is a broad OAuth scope. Review the scope screen while signed in as the intended owner.
-5. Run `installWorkers_` as the deployment owner. It idempotently installs a five-minute email worker and daily retention review trigger for that account. Installable triggers run as their creator, so do not let a different staff account install duplicate workers. Functions ending `_` are private to browser RPC.
+5. The editor may hide underscore-ending functions. Create a temporary Script named TemporarySetup with the following code. Save, select runInitialSetup and Run; after success, select runInstallWorkers and Run. **Delete TemporarySetup.gs and save before creating a public deployment.** Do not rename or remove underscores from administrative functions.
+
+```javascript
+function runInitialSetup() {
+  setup_();
+}
+function runInstallWorkers() {
+  installWorkers_();
+}
+```
+
+The worker installer idempotently creates a five-minute email trigger and daily retention-review trigger for the current owner. Installable triggers run as their creator. Do not install workers under additional staff accounts. Setup closes registration and email until testing is complete. If an error mentions a missing module/helper, replace the complete Code.gs bundle rather than adding isolated helper functions.
+
 
 The sender is the trigger/deployment owner's Gmail account, display name APO STEP, reply-to apocmwd2026.2027@gmail.com. That reply-to address does not become the sender. Google sending quotas apply; the built-in service is not unlimited. See [GmailApp.sendEmail](<https://developers.google.com/apps-script/reference/gmail/gmail-app#sendEmail(String,String,String,Object)>), [quotas](https://developers.google.com/apps-script/guides/services/quotas), and [installable triggers](https://developers.google.com/apps-script/guides/triggers/installable).
 
