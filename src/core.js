@@ -1,0 +1,326 @@
+/* Shared field schema and pure validation. Included in browser and Apps Script. */
+var StepCore = (function () {
+  "use strict";
+  var goals = [
+    "Find jobs in the Philippines.",
+    "Access legal overseas employment opportunities.",
+    "Start or grow your own business.",
+    "Enhance your skills through continuous learning.",
+    "Others (Please specify)",
+  ];
+  var regions = [
+    "National Capital Region",
+    "Cordillera Administrative Region",
+    "Region I – Ilocos Region",
+    "Region II – Cagayan Valley",
+    "Region III – Central Luzon",
+    "Region IV-A – CALABARZON",
+    "Region IV-B – MIMAROPA Region",
+    "Region V – Bicol Region",
+    "Region VI – Western Visayas",
+    "Negros Island Region",
+    "Region VII – Central Visayas",
+    "Region VIII – Eastern Visayas",
+    "Region IX – Zamboanga Peninsula",
+    "Region X – Northern Mindanao",
+    "Region XI – Davao Region",
+    "Region XII – SOCCSKSARGEN",
+    "Region XIII – Caraga",
+    "Bangsamoro Autonomous Region in Muslim Mindanao",
+  ];
+  function field(id, label, column, type, required, step, options, condition) {
+    return {
+      id: id,
+      label: label,
+      column: column,
+      type: type,
+      required: required,
+      step: step,
+      options: options,
+      condition: condition,
+    };
+  }
+  var fields = [
+    field("firstName", "First name", "First Name", "text", true, 0),
+    field("middleName", "Middle name", "Middle Name", "text", false, 0),
+    field("lastName", "Last name", "Last Name", "text", true, 0),
+    field("birthDate", "Date of birth", "Date of Birth", "date", true, 0),
+    field("sex", "Sex", "Sex", "select", true, 0, [
+      "Male",
+      "Female",
+      "Prefer not to say",
+    ]),
+    field("civilStatus", "Civil status", "Civil Status", "select", false, 0, [
+      "Single",
+      "Married",
+      "Widowed",
+      "Legally Separated",
+      "Annulled",
+      "Divorced, if legally recognized",
+    ]),
+    field("phone", "Contact number", "Contact Number", "tel", true, 0),
+    field("email", "Email address", "Email Address", "email", true, 0),
+    field(
+      "voucher",
+      "TESDA voucher code (if available)",
+      "TESDA Voucher Code",
+      "text",
+      false,
+      0,
+    ),
+    field("category", "Applying as", "Applicant Category", "select", true, 1, [
+      "APO Member",
+      "Family Member",
+    ]),
+    field(
+      "ofwStatus",
+      "Qualifying APO member’s OFW status",
+      "Member OFW Status",
+      "select",
+      true,
+      1,
+      ["Current OFW", "Former OFW"],
+    ),
+    field(
+      "membershipNumber",
+      "Qualifying member’s APO membership number",
+      "APO Membership Number",
+      "text",
+      true,
+      1,
+    ),
+    field(
+      "relationship",
+      "Relationship to the APO member",
+      "Relationship to OFW",
+      "select",
+      true,
+      1,
+      ["Parent", "Child", "Sibling", "Spouse"],
+      "family",
+    ),
+    field(
+      "ofwFirstName",
+      "APO member’s first name",
+      "OFW First Name",
+      "text",
+      true,
+      1,
+      null,
+      "family",
+    ),
+    field(
+      "ofwMiddleName",
+      "APO member’s middle name",
+      "OFW Middle Name",
+      "text",
+      false,
+      1,
+      null,
+      "family",
+    ),
+    field(
+      "ofwLastName",
+      "APO member’s last name",
+      "OFW Last Name",
+      "text",
+      true,
+      1,
+      null,
+      "family",
+    ),
+    field(
+      "ofwBirthDate",
+      "APO member’s date of birth",
+      "OFW Date of Birth",
+      "date",
+      true,
+      1,
+      null,
+      "family",
+    ),
+    field(
+      "country",
+      "Member’s latest country of deployment",
+      "Country of Deployment",
+      "text",
+      true,
+      1,
+    ),
+    field(
+      "occupation",
+      "Member’s latest overseas occupation",
+      "Occupation",
+      "text",
+      true,
+      1,
+    ),
+    field("region", "Philippine region", "Region", "select", true, 2, regions),
+    field("province", "Province / Metro Manila", "Province", "text", true, 2),
+    field(
+      "city",
+      "City / municipality",
+      "City / Municipality",
+      "text",
+      true,
+      2,
+    ),
+    field(
+      "address",
+      "Address line / street / house number",
+      "Address Line",
+      "text",
+      true,
+      2,
+    ),
+    field(
+      "otherCourse",
+      "Other TESDA course you would like to take in future",
+      "Other Course Interest",
+      "text",
+      false,
+      3,
+    ),
+    field(
+      "goal",
+      "Primary goal in attending this training",
+      "Training Goal",
+      "select",
+      true,
+      3,
+      goals,
+    ),
+    field(
+      "otherGoal",
+      "Please specify your training goal",
+      "Other Training Goal",
+      "text",
+      true,
+      3,
+      null,
+      "otherGoal",
+    ),
+  ];
+  var systemHeaders = [
+    "Registration ID",
+    "Submission Token",
+    "Submitted At",
+    "Updated At",
+    "Learner ID",
+    "Offering ID",
+    "Course ID",
+    "Course Name",
+    "Training Center",
+    "Modality",
+    "Hours",
+    "City",
+    "Consent",
+    "Consent Version",
+    "Consent Accepted At",
+    "Review Status",
+    "Possible Duplicate",
+    "Duplicate Registration IDs",
+    "Source",
+    "Payload Hash",
+  ];
+  function visible(f, d) {
+    return (
+      !f.condition ||
+      (f.condition === "family" && d.category === "Family Member") ||
+      (f.condition === "otherGoal" && d.goal === goals[4])
+    );
+  }
+  function clean(input) {
+    var d = {};
+    fields.forEach(function (f) {
+      d[f.id] = typeof input[f.id] === "string" ? input[f.id].trim() : "";
+    });
+    fields.forEach(function (f) {
+      if (!visible(f, d)) d[f.id] = "";
+    });
+    d.offeringId = typeof input.offeringId === "string" ? input.offeringId : "";
+    d.consent = input.consent === true;
+    d.consentVersion =
+      typeof input.consentVersion === "string" ? input.consentVersion : "";
+    return d;
+  }
+  function validate(input, step) {
+    var d = clean(input),
+      errors = {};
+    fields.forEach(function (f) {
+      if ((step !== undefined && f.step !== step) || !visible(f, d)) return;
+      var v = d[f.id];
+      if (f.required && !v)
+        errors[f.id] = "Enter " + f.label.toLowerCase() + ".";
+      else if (v.length > 300) errors[f.id] = "Use 300 characters or fewer.";
+      else if (v && f.options && f.options.indexOf(v) < 0)
+        errors[f.id] = "Select a listed option.";
+      else if (v && f.type === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v))
+        errors[f.id] = "Enter a valid email address.";
+      else if (
+        v &&
+        f.type === "tel" &&
+        (!/^[+\d\s().-]+$/.test(v) ||
+          v.replace(/\D/g, "").length < 7 ||
+          v.replace(/\D/g, "").length > 15)
+      )
+        errors[f.id] = "Enter 7–15 digits; international prefixes are welcome.";
+      else if (v && f.type === "date") {
+        var date = new Date(v + "T00:00:00Z");
+        if (
+          !/^\d{4}-\d{2}-\d{2}$/.test(v) ||
+          isNaN(date.getTime()) ||
+          date.toISOString().slice(0, 10) !== v ||
+          v > new Date().toISOString().slice(0, 10)
+        )
+          errors[f.id] = "Enter a valid date that is not in the future.";
+      }
+    });
+    if (step === undefined) {
+      if (!d.offeringId) errors.offeringId = "Select a course offering.";
+      if (!d.consent)
+        errors.consent = "Please read and accept the privacy notice.";
+    }
+    return { data: d, errors: errors };
+  }
+  function normalize(s) {
+    return String(s || "")
+      .toLowerCase()
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+  function duplicate(a, b) {
+    return (
+      normalize(a.email) === normalize(b.email) ||
+      a.phone.replace(/\D/g, "") === String(b.phone || "").replace(/\D/g, "") ||
+      (normalize(a.firstName + " " + a.lastName) ===
+        normalize(b.firstName + " " + b.lastName) &&
+        a.birthDate === b.birthDate)
+    );
+  }
+  function filterOfferings(rows, q, modality, city) {
+    q = normalize(q);
+    return rows.filter(function (r) {
+      return (
+        r.selectable !== false &&
+        (!q || normalize(r.courseName + " " + r.institution).indexOf(q) >= 0) &&
+        (!modality || r.modality === modality) &&
+        (!city || r.city === city)
+      );
+    });
+  }
+  return {
+    fields: fields,
+    headers: systemHeaders.concat(
+      fields.map(function (f) {
+        return f.column;
+      }),
+    ),
+    visible: visible,
+    clean: clean,
+    validate: validate,
+    duplicate: duplicate,
+    filterOfferings: filterOfferings,
+  };
+})();
+if (typeof module !== "undefined") module.exports = StepCore;
