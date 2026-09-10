@@ -861,6 +861,14 @@ footer {
 .grid {
   grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
 }
+#results .grid {
+  display: flex;
+  flex-wrap: wrap;
+}
+#results .grid > .card {
+  flex: 1 1 300px;
+  max-width: 100%;
+}
 .form-layout {
   grid-template-columns: minmax(210px, 18%) minmax(0, 1fr);
   gap: clamp(24px, 4vw, 70px);
