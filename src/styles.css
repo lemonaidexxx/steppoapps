@@ -862,6 +862,10 @@ footer {
 .page-heading {
   max-width: 900px;
 }
+.registration-wrap > .page-heading,
+.registration-wrap > .page-heading .committee-credit {
+  max-width: none;
+}
 .grid {
   grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
 }
