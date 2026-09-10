@@ -19,15 +19,10 @@ const assert = require("node:assert/strict");
   await page.locator(".card-link").first().click();
   await page.getByRole("button", { name: "Select this course" }).click();
   await page.getByRole("link", { name: "Proceed to registration" }).click();
-  assert.equal(await page.locator("#city").inputValue(), "");
-  assert.equal(await page.locator("#voucher").count(), 0);
-  assert.deepEqual(await page.locator("#sex option").allTextContents(), [
-    "Select an option",
-    "Male",
-    "Female",
-  ]);
-  await page.locator("#review-application").click();
+  assert.equal(await page.locator("#firstName").count(), 0);
+  await page.locator("#continue-checkpoint").click();
   assert.equal(await page.evaluate(() => document.activeElement.id), "chapter");
+  assert.equal(await page.locator("#voucher").count(), 0);
   const fill = async (values, prefix = "") => {
     for (const [id, value] of Object.entries(values)) {
       const el = page.locator("#" + prefix + id);
@@ -40,29 +35,42 @@ const assert = require("node:assert/strict");
     chapter: "Synthetic Alpha",
     batchYear: "2000",
     membershipNumber: "001234",
-    category: "OFW family member",
-    ofwStatus: "Former OFW",
+    category: "family",
+  });
+  await page.locator("#continue-checkpoint").click();
+  assert.equal(await page.locator("#ofwStatus").count(), 0);
+  assert.deepEqual(await page.locator("#sex option").allTextContents(), [
+    "Select an option",
+    "Male",
+    "Female",
+  ]);
+  await fill({
     firstName: "Synthetic Anne-Marie",
     middleName: "de la Cruz",
     lastName: "O’Test",
     birthDate: "1990-01-01",
-    sex: "Female",
+    sex: "female",
     phone: "+971 50 000 0000",
     email: "synthetic@example.invalid",
-    relationship: "Sibling",
+    relationship: "sibling",
     ofwFirstName: "Synthetic",
     ofwLastName: "Member",
     ofwBirthDate: "1985-01-01",
-    country: "Seabased OFW",
+    country: "country-seabased",
     occupation: "Synthetic occupation",
-    region: "National Capital Region",
-    province: "Metro Manila",
-    city: "Manila",
+    region: "r13",
+    province: "p-ncr",
+    city: "c1380600000",
     address: "Synthetic test address",
-    goal: "Others (Please specify)",
+    goal: "goal-other",
     otherGoal: "Synthetic goal",
   });
-  for (const id of ["apo-details", "passport-details", "address", "consent"]) {
+  for (const id of [
+    "personal-information",
+    "ofw-details",
+    "address",
+    "consent",
+  ]) {
     await page.locator('[data-section-link="' + id + '"]').click();
     await page.waitForFunction(
       (id) =>
@@ -71,20 +79,27 @@ const assert = require("node:assert/strict");
       id,
     );
     assert.equal(await page.locator('[aria-current="location"]').count(), 1);
-    assert.equal(
-      await page.locator("#chapter").inputValue(),
-      "Synthetic Alpha",
+    assert.match(
+      await page.locator(".membership-summary").innerText(),
+      /Synthetic Alpha/,
     );
   }
   await page.locator("#consent").check();
-  assert.equal(await page.locator("#otherProgramsConsent").isChecked(), false);
+  assert.equal(await page.locator("#otherProgramsConsent").count(), 0);
+  await page.locator("[data-open-privacy]").click();
+  assert.equal(await page.locator("dialog[open]").count(), 1);
+  await page.locator("#privacy-dialog").press("Escape");
+  assert.equal(
+    await page.locator("#firstName").inputValue(),
+    "Synthetic Anne-Marie",
+  );
   await page.locator("#review-application").click();
   assert.equal(
     await page.evaluate(() => document.activeElement.id),
     "review-title",
   );
   assert.match(await page.locator("#review-content").innerText(), /001234/);
-  await page.locator('[data-edit="apo-details"]').click();
+  await page.locator('[data-edit="checkpoint"]').click();
   assert.equal(await page.locator("dialog[open]").count(), 1);
   await page.getByRole("button", { name: "Save changes" }).focus();
   await page.keyboard.press("Tab");
@@ -94,18 +109,24 @@ const assert = require("node:assert/strict");
   );
   await page.locator("#edit-chapter").fill("Discard");
   await page.locator("#cancel-edit").click();
-  assert.equal(await page.locator("#chapter").inputValue(), "Synthetic Alpha");
-  await page.locator('[data-edit="apo-details"]').click();
+  assert.match(
+    await page.locator(".membership-summary").innerText(),
+    /Synthetic Alpha/,
+  );
+  await page.locator('[data-edit="checkpoint"]').click();
   await page.locator("#edit-chapter").fill("Synthetic Beta");
   await page.getByRole("button", { name: "Save changes" }).click();
-  assert.equal(await page.locator("#chapter").inputValue(), "Synthetic Beta");
-  await page.locator('[data-edit="passport-details"]').click();
+  assert.match(
+    await page.locator(".membership-summary").innerText(),
+    /Synthetic Beta/,
+  );
+  await page.locator('[data-edit="personal-information"]').click();
   await page.locator("#edit-firstName").press("Escape");
   assert.equal(
     await page.evaluate(() => document.activeElement.dataset.edit),
-    "passport-details",
+    "personal-information",
   );
-  await page.locator('[data-edit="passport-details"]').press("Escape");
+  await page.locator('[data-edit="personal-information"]').press("Escape");
   assert.equal(
     await page.evaluate(() => document.activeElement.id),
     "review-application",
@@ -117,11 +138,11 @@ const assert = require("node:assert/strict");
         () => document.documentElement.scrollWidth <= innerWidth,
       ),
     );
-    await page.locator('[data-section-link="apo-details"]').click();
+    await page.locator('[data-section-link="personal-information"]').click();
     await page.waitForFunction(
       () =>
         document.querySelector('[aria-current="location"]')?.dataset
-          .sectionLink === "apo-details",
+          .sectionLink === "personal-information",
     );
     await page.locator('[data-section-link="consent"]').click();
     await page.waitForFunction(
@@ -130,7 +151,7 @@ const assert = require("node:assert/strict");
           .sectionLink === "consent",
     );
     await page.locator("#review-application").click();
-    await page.locator('[data-edit="apo-details"]').click();
+    await page.locator('[data-edit="checkpoint"]').click();
     assert.ok(
       await page
         .locator("#edit-dialog")
@@ -142,7 +163,13 @@ const assert = require("node:assert/strict");
       .click();
   }
   // A classification edit can introduce new required fields; submit must revalidate.
-  await page.locator("#category").selectOption("OFW");
+  await page.locator("#edit-membership").click();
+  await page.locator("#category").selectOption("member");
+  await page.locator("#continue-checkpoint").click();
+  assert.equal(
+    await page.locator("[data-section=ofw-details]").isVisible(),
+    false,
+  );
   await page.locator("#review-application").click();
   await page.locator("#send-application").click();
   await page.locator(".receipt").waitFor();

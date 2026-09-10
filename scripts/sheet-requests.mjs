@@ -49,7 +49,7 @@ const tables = [
       ["DistrictYear", "2026–2027"],
       ["PrivacyContact", "apocmwd2026.2027@gmail.com"],
       ["RetentionPeriod", "Through December 31, 2026"],
-      ["ConsentVersion", "STEP-2026-02"],
+      ["ConsentVersion", "STEP-2026-03"],
       ["RegistrationEnabled", "false"],
       ["Environment", "production"],
       ["OtherProgramsConsentVersion", "APO-OTHER-2026-01"],
@@ -57,6 +57,48 @@ const tables = [
     ],
   },
 ];
+const options = JSON.parse(fs.readFileSync("data/options.json", "utf8"));
+tables.push(
+  {
+    id: 260605,
+    name: "FormOptions",
+    rows: [
+      ["List Name", "Option Key", "Label", "Enabled", "Display Order"],
+      ...options.form.map((o) => [o.list, o.key, o.label, o.enabled, o.order]),
+    ],
+  },
+  {
+    id: 260606,
+    name: "AddressOptions",
+    rows: [
+      [
+        "Geographic Key",
+        "Level",
+        "Parent Key",
+        "Label",
+        "Enabled",
+        "Display Order",
+        "Source Code",
+      ],
+      ...options.addresses.map((o) => [
+        o.key,
+        o.level,
+        o.parent,
+        o.label,
+        o.enabled,
+        o.order,
+        o.sourceCode,
+      ]),
+    ],
+  },
+);
+tables
+  .find((t) => t.name === "Settings")
+  .rows.push(
+    ["AddressSourceRelease", options.source.release],
+    ["AddressSourceURL", options.source.url],
+    ["AddressSourceMirror", options.source.mirror],
+  );
 const requests = [];
 for (const t of tables) {
   const columns = t.rows[0].length,
@@ -73,7 +115,7 @@ for (const t of tables) {
         sheetId: t.id,
         title: t.name,
         gridProperties: {
-          rowCount: 1000,
+          rowCount: Math.max(1000, t.rows.length),
           columnCount: Math.max(26, columns),
           frozenRowCount: 1,
         },

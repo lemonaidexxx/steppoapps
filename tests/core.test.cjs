@@ -1,3 +1,4 @@
+require("../src/options.js").configure(require("../data/options.json"));
 const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const Core = require("../src/core.js");
@@ -10,22 +11,22 @@ function valid() {
     firstName: "Test",
     lastName: "Applicant",
     birthDate: "1990-01-01",
-    sex: "Male",
+    sex: "male",
     phone: "+63 917 000 0000",
     email: "test@example.invalid",
-    category: "OFW",
+    category: "member",
     ofwStatus: "Former OFW",
     membershipNumber: "00123",
-    country: "Seabased OFW",
+    country: "country-seabased",
     occupation: "Test occupation",
-    region: "National Capital Region",
-    province: "Metro Manila",
-    city: "Manila",
+    region: "r13",
+    province: "p-ncr",
+    city: "c1380600000",
     address: "Synthetic test address",
-    goal: "Find jobs in the Philippines.",
+    goal: "goal-0",
     offeringId: catalog[0].id,
     consent: true,
-    consentVersion: "STEP-2026-02",
+    consentVersion: "STEP-2026-03",
   };
 }
 module.exports = { valid };
@@ -48,9 +49,9 @@ test("member categories, family conditions and hidden values", () => {
       Core.validate({ ...valid(), ofwStatus: status }).errors,
       {},
     );
-  let d = { ...valid(), category: "OFW family member" };
+  let d = { ...valid(), category: "family" };
   assert.ok(Core.validate(d).errors.relationship);
-  for (const relationship of ["Parent", "Child", "Sibling", "Spouse"])
+  for (const relationship of ["parent", "child", "sibling", "spouse"])
     assert.deepEqual(
       Core.validate({
         ...d,
@@ -75,7 +76,7 @@ test("dates, membership, consent, other goal and malformed choices", () => {
     { sex: "invalid" },
     { phone: "x" },
     { email: "bad" },
-    { goal: "Others (Please specify)" },
+    { goal: "goal-other" },
   ])
     assert.ok(
       Object.keys(Core.validate({ ...valid(), ...patch }).errors).length,

@@ -43,7 +43,6 @@ function live_(s) {
     !!String(s.PrivacyContact || "").trim() &&
     !!String(s.RetentionPeriod || "").trim() &&
     !!String(s.ConsentVersion || "").trim() &&
-    !!String(s.OtherProgramsConsentVersion || "").trim() &&
     !/[\[\]]/.test(s.PrivacyContact + s.RetentionPeriod) &&
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s.PrivacyContact)
   );
@@ -67,6 +66,7 @@ function getPublicData() {
     var s = settings_();
     return {
       ok: true,
+      configuration: publicConfiguration_(configuration_()),
       offerings: offerings_().filter(function (r) {
         return r.selectable;
       }),
@@ -76,7 +76,6 @@ function getPublicData() {
         privacyContact: s.PrivacyContact,
         retentionPeriod: s.RetentionPeriod,
         consentVersion: s.ConsentVersion,
-        otherProgramsConsentVersion: s.OtherProgramsConsentVersion,
         registrationEnabled: live_(s),
       },
     };
@@ -180,15 +179,8 @@ function submitApplication(request) {
           "Your submission session is invalid. Refresh the submission session and try again.",
       };
     }
-    var result = StepCore.validate(request.data || {}),
-      data = result.data;
-    if (Object.keys(result.errors).length)
-      return {
-        ok: false,
-        errors: result.errors,
-        message: "Please check the highlighted fields.",
-      };
-    var payloadHash = hash_(data);
+    var data = StepCore.clean(request.data || {}),
+      payloadHash = hash_(data);
     lock = LockService.getScriptLock();
     if (!lock.tryLock(10000))
       return {
@@ -202,7 +194,11 @@ function submitApplication(request) {
       });
     // Check durable receipts before expiry or availability: a successful retry stays successful.
     if (previous) {
-      if (previous["Payload Hash"] !== payloadHash)
+      if (
+        previous["Payload Hash"] !== payloadHash &&
+        previous["Payload Hash"] !==
+          hash_(StepCore.legacyClean(request.data || {}))
+      )
         return {
           ok: false,
           code: "TOKEN_USED",
@@ -218,6 +214,16 @@ function submitApplication(request) {
         message:
           "Your submission session expired. Refresh the submission session; your answers are preserved.",
       };
+    var config = configuration_(),
+      result = StepCore.validate(data);
+    if (Object.keys(result.errors).length)
+      return {
+        ok: false,
+        errors: result.errors,
+        message:
+          "Some selections are missing or no longer available. Review the highlighted fields; your other answers are preserved.",
+        configuration: publicConfiguration_(config),
+      };
     var s = settings_();
     if (!live_(s))
       return {
@@ -225,10 +231,7 @@ function submitApplication(request) {
         message:
           "Applications are not open yet. Your answers have been preserved.",
       };
-    if (
-      data.consentVersion !== s.ConsentVersion ||
-      data.otherProgramsConsentVersion !== s.OtherProgramsConsentVersion
-    )
+    if (data.consentVersion !== s.ConsentVersion)
       return {
         ok: false,
         code: "CONSENT_CHANGED",
@@ -277,9 +280,6 @@ function submitApplication(request) {
         "Duplicate Registration IDs": matches.join(", "),
         Source: "APO STEP Web",
         "Payload Hash": payloadHash,
-        "Other Programs Consent": data.otherProgramsConsent,
-        "Other Programs Consent Version": s.OtherProgramsConsentVersion,
-        "Other Programs Consent Recorded At": now,
         "Retention Cutoff": "2026-12-31",
         "Retention Review":
           now >= "2026-12-31T16:00:00.000Z"
@@ -287,11 +287,24 @@ function submitApplication(request) {
             : "Not due",
         "Email Status": "Pending",
         "Email Attempts": 0,
+        "Selection Keys": JSON.stringify(
+          Object.fromEntries(
+            StepCore.fields
+              .filter(function (f) {
+                return f.type === "select";
+              })
+              .map(function (f) {
+                return [f.id, data[f.id]];
+              }),
+          ),
+        ),
+        "Configuration Version": config.version,
       };
     StepCore.fields.forEach(function (f) {
-      record[f.column] = data[f.id];
+      record[f.column] =
+        f.type === "select" ? StepOptions.label(f.id, data[f.id]) : data[f.id];
     });
-    if (data.category === "OFW") {
+    if (data.category === "member") {
       record["OFW First Name"] = data.firstName;
       record["OFW Middle Name"] = data.middleName;
       record["OFW Last Name"] = data.lastName;

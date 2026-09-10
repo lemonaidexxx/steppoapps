@@ -1,3 +1,5 @@
+var StepOptions =
+  typeof module !== "undefined" ? require("./options.js") : StepOptions;
 /* Shared field schema and pure validation. Included in browser and Apps Script. */
 var StepCore = (function () {
   "use strict";
@@ -281,29 +283,69 @@ var StepCore = (function () {
     "Email Next Attempt At",
     "Email Error",
   ];
-  var sections = [
-    { id: "apo-details", label: "APO member details" },
-    { id: "classification", label: "Applicant classification" },
-    { id: "passport-details", label: "Passport details" },
-    { id: "ofw-details", label: "OFW / family information" },
-    { id: "address", label: "Philippine address" },
-    { id: "training-goals", label: "Training goals" },
-    { id: "consent", label: "Privacy & consent" },
-  ];
-  function visible(f, d) {
-    return (
-      !f.condition ||
-      (f.condition === "family" && d.category === "OFW family member") ||
-      (f.condition === "otherGoal" && d.goal === goals[4])
-    );
+  var v2Fields = fields.slice();
+  fields = fields.filter(function (f) {
+    return f.id !== "ofwStatus";
+  });
+  fields.forEach(function (f) {
+    if (f.section === "passport-details") f.section = "personal-information";
+    if (
+      ["chapter", "batchYear", "membershipNumber", "category"].indexOf(f.id) >=
+      0
+    )
+      f.section = "checkpoint";
+    if (["country", "province", "city"].indexOf(f.id) >= 0) f.type = "select";
+    if (f.id === "province") f.label = "Province / area";
+    if (/Name$/.test(f.id)) {
+      var part = /First|^first/.test(f.id)
+        ? "First Name"
+        : /Middle|^middle/.test(f.id)
+          ? "Middle Name"
+          : "Last Name";
+      f.hint =
+        "Enter " +
+        (f.id.indexOf("ofw") === 0
+          ? "your qualifying APO member’s "
+          : "your ") +
+        part +
+        " exactly as shown on " +
+        (f.id.indexOf("ofw") === 0 ? "their" : "your") +
+        " passport.";
+    }
+  });
+  extraHeaders = extraHeaders.concat([
+    "Selection Keys",
+    "Configuration Version",
+  ]);
+  function sectionFor(f, d) {
+    return ["country", "occupation"].indexOf(f.id) >= 0
+      ? d.category === "family"
+        ? "ofw-details"
+        : "personal-information"
+      : f.section;
   }
-  function clean(input) {
+  function labelFor(f, d) {
+    if (f.id === "country")
+      return d.category === "family"
+        ? "Your qualifying APO member’s country of deployment"
+        : "Your country of deployment";
+    if (f.id === "occupation")
+      return d.category === "family"
+        ? "Your qualifying APO member’s overseas occupation"
+        : "Your overseas occupation";
+    return f.label.replace("APO member’s", "Your qualifying APO member’s");
+  }
+  function legacyClean(input) {
     var d = {};
-    fields.forEach(function (f) {
+    v2Fields.forEach(function (f) {
       d[f.id] = typeof input[f.id] === "string" ? input[f.id].trim() : "";
     });
-    fields.forEach(function (f) {
-      if (!visible(f, d)) d[f.id] = "";
+    v2Fields.forEach(function (f) {
+      if (
+        (f.condition === "family" && d.category !== "OFW family member") ||
+        (f.condition === "otherGoal" && d.goal !== goals[4])
+      )
+        d[f.id] = "";
     });
     d.offeringId = typeof input.offeringId === "string" ? input.offeringId : "";
     d.consent = input.consent === true;
@@ -316,13 +358,48 @@ var StepCore = (function () {
       typeof input.consentVersion === "string" ? input.consentVersion : "";
     return d;
   }
+  var sections = [
+    { id: "checkpoint", label: "APO membership and applicant classification" },
+    { id: "personal-information", label: "Personal information" },
+    { id: "ofw-details", label: "Your qualifying APO member’s information" },
+    { id: "address", label: "Philippine address" },
+    { id: "training-goals", label: "Training goals" },
+    { id: "consent", label: "Privacy & consent" },
+  ];
+  function visible(f, d) {
+    return (
+      !f.condition ||
+      (f.condition === "family" && d.category === "family") ||
+      (f.condition === "otherGoal" && d.goal === "goal-other")
+    );
+  }
+  function clean(input) {
+    var d = {};
+    fields.forEach(function (f) {
+      d[f.id] = typeof input[f.id] === "string" ? input[f.id].trim() : "";
+    });
+    fields.forEach(function (f) {
+      if (!visible(f, d)) d[f.id] = "";
+    });
+    d.offeringId = typeof input.offeringId === "string" ? input.offeringId : "";
+    d.consent = input.consent === true;
+    d.configurationVersion =
+      typeof input.configurationVersion === "string"
+        ? input.configurationVersion
+        : "";
+    d.consentVersion =
+      typeof input.consentVersion === "string" ? input.consentVersion : "";
+    return d;
+  }
   function validate(input, step) {
     var d = clean(input),
       errors = {};
     fields.forEach(function (f) {
       if (
         (step !== undefined &&
-          (typeof step === "string" ? f.section !== step : f.step !== step)) ||
+          (typeof step === "string"
+            ? sectionFor(f, d) !== step
+            : f.step !== step)) ||
         !visible(f, d)
       )
         return;
@@ -330,7 +407,7 @@ var StepCore = (function () {
       if (f.required && !v)
         errors[f.id] = "Enter " + f.label.toLowerCase() + ".";
       else if (v.length > 300) errors[f.id] = "Use 300 characters or fewer.";
-      else if (v && f.options && f.options.indexOf(v) < 0)
+      else if (v && f.type === "select" && !StepOptions.valid(f.id, v, d))
         errors[f.id] = "Select a listed option.";
       else if (f.id === "batchYear" && !/^\d{4}$/.test(v))
         errors[f.id] = "Enter a four-digit batch year.";
@@ -393,6 +470,9 @@ var StepCore = (function () {
   }
   return {
     fields: fields,
+    legacyClean: legacyClean,
+    sectionFor: sectionFor,
+    labelFor: labelFor,
     headers: legacyHeaders.concat(extraHeaders),
     legacyHeaders: legacyHeaders,
     sections: sections,

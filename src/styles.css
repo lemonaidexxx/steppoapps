@@ -1103,3 +1103,39 @@ dialog::backdrop {
     padding: 22px;
   }
 }
+/* Membership checkpoint and selected-offering header. */
+.course-heading {
+  margin-bottom: 24px;
+}
+.course-heading .facts {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+.checkpoint {
+  width: 100%;
+}
+.checkpoint [data-field="category"] {
+  grid-column: 1 / -1;
+}
+.membership-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin: 24px 0;
+}
+.membership-summary p {
+  margin: 0;
+}
+.section-links a[hidden],
+.registration-section[hidden] {
+  display: none;
+}
+@media (max-width: 700px) {
+  .checkpoint .form-grid {
+    grid-template-columns: 1fr;
+  }
+  .membership-summary {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

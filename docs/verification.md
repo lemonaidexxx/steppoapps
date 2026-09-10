@@ -1,23 +1,22 @@
-# Verification record — v2, September 10, 2026
+# Verification record — v3, September 10, 2026
 
-## Completed locally
+## Completed
 
-- 20 automated tests pass: all 139 offerings / 53 titles; category and conditional validation; four-digit batch and digits-only IDs preserving zeros; passport spelling; removed voucher and restricted new Sex values; optional consent; idempotent receipts; duplicate safeguards; tampered/expired tokens; unavailable offerings; failed/uncertain writes; size/honeypot/formula guards; private helper isolation.
-- Mock Sheets/Gmail checks cover reordered and extra columns, historical voucher/Sex preservation, idempotent migration, disabled switches, one queued confirmation, bounded quota retries, uncertain sends/post-send writes routed to review, retention cutoff and idempotent trigger setup.
-- CUA browser testing completed synthetic family and member applications, including optional consent declined and accepted. Both produced DEMO receipts; no Google writes or emails occurred.
-- Browser checks verified required-field focus, leading zeros and exact names in review, preserved answers across section fragment navigation, conditional family/other-goal fields, drawer cancel/save, Escape and focus restoration. A category edit introducing missing family fields is revalidated before submission.
-- Desktop (1440), tablet (768), and mobile (390) layouts were inspected with the supplied logo. No horizontal document overflow appeared. Mobile header height and section offset were measured; the first/last-section indicators remain unique and the current mobile link scrolls into view.
-- Native modal focus wrapping was added after keyboard testing exposed Tab leaving the last drawer button. The rebuilt preview passed forward/reverse drawer wrapping and forward review wrapping; focus stayed inside the open modal.
-- The reproducible tests/browser.cjs was updated for the continuous form. Browser actions in this session were run through CUA, not that standalone script.
-- Apps Script build succeeds. Source and catalog stay separate from credentials and application records.
+- 30 automated tests cover 139 offerings, checkpoint and conditional validation, leading-zero IDs, exact names, current option keys, parent relationships, disabled selections, edited-label snapshots and historical-row preservation.
+- Geographic tests verify 18 regions, 82 source provinces, 149 cities and 1,493 municipalities; all 17 NCR localities; NIR's three provinces and Bacolod; updated municipality names; and all 250 supplied country labels in exact order.
+- Mock Apps Script tests cover idempotent migration of populated and missing option tabs, public enabled choices, duplicate/tampered/expired tokens, durable legacy receipts, formula guards, failed/uncertain writes, restricted public RPC, retention and unchanged email-queue safeguards. Repeated applications remain recorded with advisory duplicate flags.
+- CUA browser checks exercised member/family checkpoints, invalid-field focus, direct-fragment bypass protection, classification changes preserving answers, applicant-relative deployment labels, conditional navigation/review, leading-zero IDs, NCR/NIR cascades and clearing descendants.
+- Privacy opens as the only modal, including from the editor; Escape returns focus and preserves edits. Address editor cancellation preserves the original address. Review and editor remain native dialogs. No optional-program checkbox or separate OFW status intake remains.
+- Inspected desktop 1440px, tablet 768px and mobile 390px layouts with the supplied logo. No document overflow; mobile address editor fits as a bottom sheet. The last-section current indicator is unique and family navigation is hidden for members. A synthetic member submission produced a DEMO receipt and a repeat application returned to the checkpoint. No browser console errors were reported.
+- tests/browser.cjs is the updated reproducible browser specification. Session browser verification used CUA rather than executing that standalone script. Apps Script build and whitespace checks pass.
 
-## Live Google Sheet
+## Live spreadsheet
 
-- Read existing headers/settings before writing. Appended 13 columns to Applications (46 → 59), preserving original columns and all application rows. No historical values were rewritten and no historical emails were queued.
-- Read back AU1:BG1 and updated Settings: approved contact, December 31, 2026 retention, both consent versions, RegistrationEnabled=false and EmailEnabled=false.
-- Catalog tabs and offering IDs were untouched. Sheet1 was absent in current metadata and was not recreated. Existing sharing permissions were not changed.
-- New headers copied the prior header formatting. Authenticated Google-rendered visual inspection was unavailable; migration used bounded Sheets API reads/writes.
+- Inspected existing metadata, headers and settings before bounded writes. Applications now has 61 columns: appended Selection Keys and Configuration Version to the previous 59. No historical application rows were modified.
+- Added FormOptions (269 rows) and AddressOptions (1,744 rows). Read back every seeded row and compared it with the generated source. Applied header formatting, frozen headers, filters, row bands, column sizing and input validation.
+- Settings records STEP-2026-03 and source release/URL/pinned mirror. RegistrationEnabled=false and EmailEnabled=false. Retired optional-consent settings remain for historical context.
+- Catalogs, offering IDs and sharing permissions were untouched. Sheet1 was absent and was not recreated. Authenticated Google-rendered visual inspection was unavailable; API readback verified values and formatting properties.
 
 ## Owner rollout remains pending
 
-No live Apps Script project/deployment, Gmail authorization, owner worker trigger, anonymous submission, or real confirmation-delivery test was completed. Follow deployment.md using a separate test spreadsheet and an owner-controlled inbox before opening production. Mocks do not prove live Google authorization, quotas or concurrent execution. Registration and email sending remain disabled.
+Upload all generated Apps Script files, authorize Gmail, install owner triggers and deploy against an isolated test Sheet. Anonymous submission and real confirmation delivery must pass before opening production. No live deployment or email was performed here; local previews use synthetic data and mocks do not prove Google authorization, quotas or actual concurrent execution. See deployment.md.

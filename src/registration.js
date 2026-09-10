@@ -20,33 +20,60 @@ var StepRegistration = (function () {
     return '<p class="committee-credit">A joint program of the <strong>Committee on Training and Skills Development</strong> and the <strong>Committee on Members’ Welfare and Development</strong>.</p>';
   }
   function privacy() {
-    var s = ctx.state.settings;
     return (
-      '<div class="privacy-copy"><h2>APO STEP privacy and consent</h2><p>Alpha Phi Omega Philippines, Inc., through the Committee on Training and Skills Development and the Committee on Members’ Welfare and Development, processes application information to administer STEP.</p><p>Your information is used for eligibility and membership verification, OFW and family-status assessment, training coordination, participant communication, welfare support connected with the program, monitoring, evaluation, recordkeeping, and reporting. Authorized APO program staff may share relevant information with the selected training institution and authorized training or welfare partners when necessary for these stated purposes. Sharing must be relevant, proportionate, and subject to appropriate safeguards.</p><p>If you provide another person’s details, confirm that you are authorized to provide them for these purposes. Enter names exactly as shown on the relevant person’s passport.</p><p><strong>Retention:</strong> ' +
-      e(s.retentionPeriod || "Through December 31, 2026") +
-      '. Records are flagged for staff retention review after this cutoff; they are not automatically deleted or retained indefinitely.</p><p><strong>Privacy requests:</strong> Contact <a href="mailto:apocmwd2026.2027@gmail.com">apocmwd2026.2027@gmail.com</a> for access, correction, deletion, or withdrawal requests. Requests are reviewed in light of applicable obligations. Consent does not waive your privacy rights.</p><h3>Optional updates about other APO programs</h3><p>You may separately choose to receive information about future APO training and welfare opportunities. If you opt in, your name, contact details, and stated training interests may be used by authorized APO training and welfare committees and shared with authorized partners only as needed to coordinate those opportunities. This choice is optional, can be withdrawn, and does not affect your STEP application. The same stated retention cutoff applies; it does not authorize use beyond that period.</p><p class="helper">STEP notice: ' +
-      e(s.consentVersion) +
-      " · Other-program notice: " +
-      e(s.otherProgramsConsentVersion) +
+      '<div class="privacy-copy"><h2>APO Data Privacy and Consent</h2><p>Alpha Phi Omega Philippines, Inc., through the Committee on Training and Skills Development and the Committee on Members’ Welfare and Development, administers STEP and related APO training, welfare, referral and support services.</p><h3>Information and purposes</h3><p>By submitting this form, you freely and voluntarily consent to APO’s collection, verification, use, storage, updating, sharing and other lawful processing of the information you or your authorized representative provide. This includes your identity, membership, contact, deployment, Philippine address, selected training and training goals, and the qualifying member’s information when you apply as a family member.</p><p>These details support eligibility and membership verification, application administration, training coordination, welfare assistance, referrals, employment and reintegration support, participant communication, monitoring, recordkeeping, reporting and evaluation of APO programs and related services.</p><h3>Contact and authorized sharing</h3><p>Authorized representatives may contact you by call, text message, email or other official channels using the details you supply for verification, application updates, training, assistance, referrals and related APO service communications.</p><p>Where necessary for these declared purposes, APO may provide relevant and proportionate information to authorized APO offices and committees, training institutions, government agencies, service providers, program and welfare partners, and other authorized stakeholders involved in delivering or coordinating those services. This may include TESDA, OWWA, DMW, DOLE and local government units when relevant to a referral or service; listing them does not claim a partnership or automatic access to your data.</p><p>Recipients must use information for authorized, lawful purposes and observe appropriate confidentiality, security and applicable data-sharing requirements. This consent does not authorize unrestricted public disclosure or unrelated use. If you provide another person’s details, you confirm that you are authorized to provide them for the purposes described here.</p><h3>Retention and safeguards</h3><p>Information is retained through <strong>December 31, 2026</strong>. Records are flagged for staff retention review after that date. They are not automatically deleted, and the review flag does not extend the stated retention period or consent. APO will review any further retention required by applicable obligations and communicate the applicable basis.</p><h3>Your rights and privacy requests</h3><p>You may request access or correction, object to processing, or withdraw consent, subject to applicable laws and procedures. Withdrawal may affect services that need the information but does not invalidate lawful processing already undertaken. Contact <a href="mailto:apocmwd2026.2027@gmail.com">apocmwd2026.2027@gmail.com</a> for privacy requests.</p><p>Processing is subject to Republic Act No. 10173 (Data Privacy Act of 2012), its Implementing Rules and Regulations, applicable National Privacy Commission issuances and other relevant laws. Membership does not waive privacy rights.</p><p class="helper">Consent version: ' +
+      e(ctx.state.settings.consentVersion) +
       "</p></div>"
     );
   }
   function consentFields(data, prefix) {
     return (
-      privacy() +
-      '<label class="consent-label"><input id="' +
+      '<p>APO will use your information for training, welfare, referrals, related support, administration and authorized sharing described in the <a href="#privacy" data-open-privacy>Data Privacy and Consent</a> notice.</p><label class="consent-label"><input id="' +
       prefix +
       'consent" name="consent" type="checkbox" ' +
       (data.consent ? "checked" : "") +
-      ' required><span>I have read the STEP notice and consent to the stated purposes. I confirm my details are accurate and I am authorized to provide any family member’s information. <strong>Required</strong></span></label><span class="error" id="' +
+      ' required><span>I have read and agree to the APO Data Privacy and Consent notice. I confirm my information is accurate and I am authorized to provide any qualifying member’s details. <strong>Required</strong></span></label><span class="error" id="' +
       prefix +
-      'error-consent"></span><label class="consent-label optional-consent"><input id="' +
-      prefix +
-      'otherProgramsConsent" name="otherProgramsConsent" type="checkbox" ' +
-      (data.otherProgramsConsent ? "checked" : "") +
-      "><span>I also consent to receive information about other APO training and welfare opportunities and the limited sharing described above. <strong>Optional</strong></span></label>"
+      'error-consent"></span>'
     );
   }
+  var privacyOrigin = null,
+    privacyFocus = null;
+  function openPrivacy(link) {
+    privacyFocus = link;
+    privacyOrigin = document.querySelector("dialog[open]");
+    if (privacyOrigin) privacyOrigin.close();
+    document.getElementById("privacy-content").innerHTML = privacy();
+    document.getElementById("privacy-dialog").showModal();
+    document.getElementById("privacy-title").focus();
+  }
+  function closePrivacy() {
+    document.getElementById("privacy-dialog").close();
+    if (privacyOrigin && document.contains(privacyOrigin))
+      privacyOrigin.showModal();
+    if (privacyFocus && document.contains(privacyFocus)) privacyFocus.focus();
+    privacyOrigin = null;
+  }
+  function activeSections() {
+    return sections.filter(function (section) {
+      return (
+        section.id !== "checkpoint" &&
+        (section.id !== "ofw-details" || ctx.state.draft.category === "family")
+      );
+    });
+  }
+  function courseHeader() {
+    var o = ctx.offering();
+    return (
+      '<section class="panel course-heading" aria-label="Your selected course"><div class="eyebrow">YOUR SELECTED COURSE</div><h2>' +
+      e(o.courseName) +
+      "</h2>" +
+      ctx.facts(o) +
+      '<p class="callout">Each class requires 25 learners before training can begin. Please keep your phone lines open and check your email regularly for updates.</p><a href="#courses">Change course</a></section>'
+    );
+  }
+  var repeatNotice =
+    "You may submit as many applications as you wish for available courses. Submit one application per course offering.";
   function field(f, data, prefix) {
     var id = prefix + f.id,
       value = data[f.id] || "",
@@ -72,15 +99,15 @@ var StepRegistration = (function () {
         ? "<select" +
           attrs +
           '><option value="">Select an option</option>' +
-          f.options
+          StepOptions.choices(f.id, data)
             .map(function (v) {
               return (
                 '<option value="' +
-                e(v) +
+                e(v.key) +
                 '" ' +
-                (v === value ? "selected" : "") +
+                (v.key === value ? "selected" : "") +
                 ">" +
-                e(v) +
+                e(v.label) +
                 "</option>"
               );
             })
@@ -110,7 +137,7 @@ var StepRegistration = (function () {
       '><label for="' +
       id +
       '">' +
-      e(f.label) +
+      e(StepCore.labelFor(f, data)) +
       (f.required
         ? ' <span aria-hidden="true">*</span>'
         : ' <span class="muted">(optional)</span>') +
@@ -132,29 +159,52 @@ var StepRegistration = (function () {
       '<div class="form-grid">' +
       StepCore.fields
         .filter(function (f) {
-          return f.section === section;
+          return StepCore.sectionFor(f, data) === section;
         })
         .map(function (f) {
           return field(f, data, prefix);
         })
         .join("") +
-      "</div>" +
-      (section === "ofw-details"
-        ? '<datalist id="' +
-          prefix +
-          'country-hints"><option value="Seabased OFW"></datalist>'
-        : "")
+      "</div>"
     );
   }
   function html() {
-    var o = ctx.offering();
-    if (!o)
-      return '<div class="wrap"><h1>Choose your course first.</h1><p>Select an offering before applying.</p><a class="btn" href="#courses">Explore courses</a></div>';
-    return (
-      '<div class="wrap registration-wrap"><div class="page-heading"><div class="eyebrow">YOUR STEP APPLICATION</div><h1>A new chapter starts with you.</h1>' +
+    if (!ctx.offering())
+      return '<div class="wrap"><h1>Choose your course first.</h1><a class="btn" href="#courses">Explore courses</a></div>';
+    var passed =
+      ctx.state.checkpointPassed &&
+      Object.keys(StepCore.validate(ctx.state.draft, "checkpoint").errors)
+        .length === 0;
+    ctx.state.checkpointPassed = !!passed;
+    var heading =
+      '<div class="wrap registration-wrap"><div class="page-heading"><div class="eyebrow">YOUR STEP APPLICATION</div><h1>' +
+      (passed ? "Tell us about yourself." : "Before you begin.") +
+      "</h1>" +
       committees() +
-      '<p>Start with the qualifying APO member’s details, including when applying as a family member. Fields marked * are required.</p></div><div class="form-layout"><aside class="registration-rail"><nav class="section-nav" aria-label="On this page"><strong>On this page</strong><div class="section-links">' +
+      "<p>" +
+      repeatNotice +
+      "</p></div>" +
+      courseHeader();
+    if (!passed)
+      return (
+        heading +
+        '<form id="application" class="panel checkpoint" novalidate><h2>APO member details</h2><p>Enter the qualifying APO member’s chapter, batch year and numeric ID. Staff will verify membership manually.</p><div id="form-errors" role="alert"></div>' +
+        content("checkpoint", ctx.state.draft, "") +
+        '<div class="form-actions"><button class="btn gold" id="continue-checkpoint" type="submit">Continue to application →</button></div></form></div>'
+      );
+    return (
+      heading +
+      '<div class="membership-summary"><p><strong>' +
+      e(ctx.state.draft.chapter) +
+      "</strong> · Batch " +
+      e(ctx.state.draft.batchYear) +
+      " · " +
+      e(StepOptions.label("category", ctx.state.draft.category)) +
+      '</p><button class="text-button" id="edit-membership" type="button">Edit membership details</button></div><div class="form-layout"><aside class="registration-rail"><nav class="section-nav" aria-label="On this page"><strong>On this page</strong><div class="section-links">' +
       sections
+        .filter(function (s) {
+          return s.id !== "checkpoint";
+        })
         .map(function (s, i) {
           return (
             '<a href="#register/' +
@@ -162,6 +212,9 @@ var StepRegistration = (function () {
             '" data-section-link="' +
             s.id +
             '" ' +
+            (s.id === "ofw-details" && ctx.state.draft.category !== "family"
+              ? "hidden "
+              : "") +
             (i === 0 ? 'aria-current="location"' : "") +
             ">" +
             s.label +
@@ -169,23 +222,22 @@ var StepRegistration = (function () {
           );
         })
         .join("") +
-      '</div></nav><div class="selected-summary"><strong>' +
-      e(o.courseName) +
-      "</strong>" +
-      e(o.institution) +
-      "<br>" +
-      e(o.city) +
-      " · " +
-      e(o.hours) +
-      ' hours<br><a href="#courses">Change course</a></div></aside><form id="application" novalidate><div id="form-errors" role="alert"></div>' +
+      '</div></nav></aside><form id="application" novalidate><div id="form-errors" role="alert"></div>' +
       sections
+        .filter(function (s) {
+          return s.id !== "checkpoint";
+        })
         .map(function (s) {
           return (
             '<section class="panel registration-section" id="register/' +
             s.id +
             '" data-section="' +
             s.id +
-            '" aria-labelledby="heading-' +
+            '" ' +
+            (s.id === "ofw-details" && ctx.state.draft.category !== "family"
+              ? "hidden "
+              : "") +
+            ' aria-labelledby="heading-' +
             s.id +
             '"><h2 id="heading-' +
             s.id +
@@ -197,7 +249,7 @@ var StepRegistration = (function () {
           );
         })
         .join("") +
-      '<div class="hp" aria-hidden="true"><label>Website<input id="website" name="website" tabindex="-1" autocomplete="off"></label></div><div class="form-actions"><span class="helper">Review all details before submitting.</span><button class="btn gold" type="submit" id="review-application">Review application →</button></div></form></div></div><dialog id="review-dialog" class="review-dialog" aria-labelledby="review-title"><div class="dialog-top"><h2 id="review-title" tabindex="-1">Review your application</h2><button class="icon-close" type="button" data-close-review aria-label="Close review">×</button></div><div id="review-content"></div><div id="submission-errors" role="alert"></div><div id="retry-actions"></div><div class="dialog-actions"><button class="btn secondary" type="button" data-close-review>Back to application</button><button class="btn gold" id="send-application" type="button">Submit application</button></div></dialog><dialog id="edit-dialog" class="edit-dialog" aria-labelledby="edit-title"><form id="edit-form" novalidate><div class="dialog-top"><h2 id="edit-title" tabindex="-1"></h2><button class="icon-close" type="button" id="cancel-edit-top" aria-label="Cancel editing">×</button></div><div id="edit-errors" role="alert"></div><div id="edit-content"></div><div class="dialog-actions"><button class="btn secondary" id="cancel-edit" type="button">Cancel</button><button class="btn gold" type="submit">Save changes</button></div></form></dialog>'
+      '<div class="hp" aria-hidden="true"><label>Website<input id="website" name="website" tabindex="-1" autocomplete="off"></label></div><div class="form-actions"><span class="helper">Review all details before submitting.</span><button class="btn gold" type="submit" id="review-application">Review application →</button></div></form></div></div><dialog id="review-dialog" class="review-dialog" aria-labelledby="review-title"><div class="dialog-top"><h2 id="review-title" tabindex="-1">Review your application</h2><button class="icon-close" type="button" data-close-review aria-label="Close review">×</button></div><div id="review-content"></div><div id="submission-errors" role="alert"></div><div id="retry-actions"></div><div class="dialog-actions"><button class="btn secondary" type="button" data-close-review>Back to application</button><button class="btn gold" id="send-application" type="button">Submit application</button></div></dialog><dialog id="edit-dialog" class="edit-dialog" aria-labelledby="edit-title"><form id="edit-form" novalidate><div class="dialog-top"><h2 id="edit-title" tabindex="-1"></h2><button class="icon-close" type="button" id="cancel-edit-top" aria-label="Cancel editing">×</button></div><div id="edit-errors" role="alert"></div><div id="edit-content"></div><div class="dialog-actions"><button class="btn secondary" id="cancel-edit" type="button">Cancel</button><button class="btn gold" type="submit">Save changes</button></div></form></dialog><dialog id="privacy-dialog" class="review-dialog" aria-labelledby="privacy-title"><div class="dialog-top"><h2 id="privacy-title" tabindex="-1">Data Privacy and Consent</h2><button type="button" class="icon-close" id="close-privacy" aria-label="Close privacy notice">×</button></div><div id="privacy-content"></div></dialog>'
     );
   }
   function read(root, data) {
@@ -226,15 +278,55 @@ var StepRegistration = (function () {
   }
   function syncForm() {
     var root = document.getElementById("application");
-    StepCore.fields.forEach(function (f) {
-      var el = root.querySelector('[name="' + f.id + '"]');
-      if (el) el.value = ctx.state.draft[f.id] || "";
+    root.querySelectorAll(".registration-section").forEach(function (section) {
+      var spec = sections.find(function (s) {
+        return s.id === section.dataset.section;
+      });
+      section.innerHTML =
+        '<h2 id="heading-' +
+        spec.id +
+        '">' +
+        spec.label +
+        "</h2>" +
+        content(spec.id, ctx.state.draft, "");
+      section.hidden =
+        spec.id === "ofw-details" && ctx.state.draft.category !== "family";
     });
-    ["consent", "otherProgramsConsent"].forEach(function (k) {
-      root.querySelector('[name="' + k + '"]').checked =
-        ctx.state.draft[k] === true;
+    document.querySelectorAll("[data-section-link]").forEach(function (link) {
+      link.hidden =
+        link.dataset.sectionLink === "ofw-details" &&
+        ctx.state.draft.category !== "family";
     });
-    conditional(root, ctx.state.draft);
+    var summary = document.querySelector(".membership-summary p");
+    if (summary)
+      summary.textContent =
+        ctx.state.draft.chapter +
+        " · Batch " +
+        ctx.state.draft.batchYear +
+        " · " +
+        StepOptions.label("category", ctx.state.draft.category);
+    activeSection();
+  }
+  function cascade(root, data, id) {
+    var ids =
+      id === "region"
+        ? ["province", "city"]
+        : id === "province"
+          ? ["city"]
+          : [];
+    ids.forEach(function (key) {
+      data[key] = "";
+      var f = StepCore.fields.find(function (f) {
+          return f.id === key;
+        }),
+        wrapper = root.querySelector('[data-field="' + key + '"]');
+      if (wrapper)
+        wrapper.outerHTML = field(
+          f,
+          data,
+          root.id === "edit-form" ? "edit-" : "",
+        );
+    });
   }
   function errors(root, items, summary, prefix) {
     root.querySelectorAll("[aria-invalid]").forEach(function (el) {
@@ -275,6 +367,9 @@ var StepRegistration = (function () {
       "</h3>" +
       ctx.facts(o) +
       sections
+        .filter(function (s) {
+          return s.id !== "ofw-details" || d.category === "family";
+        })
         .map(function (s) {
           return (
             '<section class="review-section"><div class="section-head"><h3>' +
@@ -285,20 +380,25 @@ var StepRegistration = (function () {
             s.label +
             "</span></button></div>" +
             (s.id === "consent"
-              ? "<p>STEP consent: Accepted<br>Other APO programs: " +
-                (d.otherProgramsConsent ? "Opted in" : "Not opted in") +
-                "</p>"
+              ? "<p>APO Data Privacy and Consent: Accepted</p>"
               : '<dl class="review">' +
                 StepCore.fields
                   .filter(function (f) {
-                    return f.section === s.id && StepCore.visible(f, d);
+                    return (
+                      StepCore.sectionFor(f, d) === s.id &&
+                      StepCore.visible(f, d)
+                    );
                   })
                   .map(function (f) {
                     return (
                       "<div><dt>" +
-                      e(f.label) +
+                      e(StepCore.labelFor(f, d)) +
                       "</dt><dd>" +
-                      e(d[f.id] || "Not provided") +
+                      e(
+                        (f.type === "select"
+                          ? StepOptions.label(f.id, d[f.id])
+                          : d[f.id]) || "Not provided",
+                      ) +
                       "</dd></div>"
                     );
                   })
@@ -319,7 +419,7 @@ var StepRegistration = (function () {
     var focus = focusSection
       ? dialog.querySelector('[data-edit="' + focusSection + '"]')
       : document.getElementById("review-title");
-    focus.focus();
+    (focus || document.getElementById("review-title")).focus();
     dialog.querySelectorAll("[data-edit]").forEach(function (btn) {
       btn.onclick = function () {
         openEditor(btn.dataset.edit);
@@ -397,8 +497,7 @@ var StepRegistration = (function () {
       }
       var data = Object.assign({}, ctx.state.draft, {
         consentVersion: ctx.state.settings.consentVersion,
-        otherProgramsConsentVersion:
-          ctx.state.settings.otherProgramsConsentVersion,
+        configurationVersion: StepOptions.version(),
       });
       var response = await ctx.rpc("submitApplication", {
         token: ctx.state.token,
@@ -427,8 +526,17 @@ var StepRegistration = (function () {
           summary.textContent = "Session refreshed. Submit again when ready.";
         };
       }
+      if (response.configuration) StepOptions.configure(response.configuration);
       if (response.errors) {
         dialog.close();
+        if (
+          StepCore.fields.some(function (f) {
+            return f.section === "checkpoint" && response.errors[f.id];
+          })
+        ) {
+          ctx.state.checkpointPassed = false;
+          ctx.redraw();
+        } else syncForm();
         errors(
           document.getElementById("application"),
           response.errors,
@@ -451,7 +559,7 @@ var StepRegistration = (function () {
   }
   function activeSection() {
     var targets = Array.from(
-      document.querySelectorAll(".registration-section"),
+      document.querySelectorAll(".registration-section:not([hidden])"),
     );
     if (!targets.length) return;
     var offset =
@@ -511,7 +619,7 @@ var StepRegistration = (function () {
     var id = fragment.replace(/^register\/?/, "");
     if (!id) return;
     var target = document.getElementById("register/" + id);
-    if (target)
+    if (target && !target.hidden)
       target.scrollIntoView({
         block: "start",
         behavior: matchMedia("(prefers-reduced-motion: reduce)").matches
@@ -545,14 +653,50 @@ var StepRegistration = (function () {
   function mount(fragment) {
     var form = document.getElementById("application");
     if (!form) return;
-    ["review-dialog", "edit-dialog"].forEach(function (id) {
+    if (!ctx.state.checkpointPassed) {
+      form.oninput = capture;
+      form.onsubmit = function (event) {
+        event.preventDefault();
+        capture();
+        var check = StepCore.validate(ctx.state.draft, "checkpoint");
+        if (
+          errors(form, check.errors, document.getElementById("form-errors"), "")
+        )
+          return;
+        ctx.state.checkpointPassed = true;
+        ctx.redraw();
+        navigate("register/personal-information");
+      };
+      return;
+    }
+    document.getElementById("edit-membership").onclick = function () {
+      capture();
+      ctx.state.checkpointPassed = false;
+      ctx.redraw();
+    };
+    document.getElementById("close-privacy").onclick = closePrivacy;
+    document
+      .getElementById("privacy-dialog")
+      .addEventListener("cancel", function (event) {
+        event.preventDefault();
+        closePrivacy();
+      });
+    document.getElementById("main").onclick = function (event) {
+      var link = event.target.closest("[data-open-privacy]");
+      if (link) {
+        event.preventDefault();
+        openPrivacy(link);
+      }
+    };
+    ["review-dialog", "edit-dialog", "privacy-dialog"].forEach(function (id) {
       document.getElementById(id).addEventListener("keydown", keepModalFocus);
     });
     form.addEventListener("input", function () {
       capture();
     });
-    form.addEventListener("change", function () {
+    form.addEventListener("change", function (event) {
       capture();
+      cascade(form, ctx.state.draft, event.target.name);
       conditional(form, ctx.state.draft);
       activeSection();
     });
@@ -596,8 +740,9 @@ var StepRegistration = (function () {
     edit.oninput = function () {
       drawerDraft = read(edit, drawerDraft);
     };
-    edit.onchange = function () {
+    edit.onchange = function (event) {
       drawerDraft = read(edit, drawerDraft);
+      cascade(edit, drawerDraft, event.target.name);
       conditional(edit, drawerDraft);
     };
     edit.onsubmit = function (event) {
@@ -618,12 +763,13 @@ var StepRegistration = (function () {
   }
   function destroy(preserve) {
     if (preserve !== false) capture();
+    document.getElementById("main").onclick = null;
     if (observer) observer.disconnect();
     if (resizeObserver) resizeObserver.disconnect();
     if (frame) cancelAnimationFrame(frame);
     window.removeEventListener("scroll", scrollHandler);
     window.removeEventListener("resize", resizeHandler);
-    ["review-dialog", "edit-dialog"].forEach(function (id) {
+    ["review-dialog", "edit-dialog", "privacy-dialog"].forEach(function (id) {
       var d = document.getElementById(id);
       if (d && d.open) d.close();
     });

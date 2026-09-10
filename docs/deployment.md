@@ -2,15 +2,15 @@
 
 ## Current state
 
-Source is in GitHub. The private stepoapps sheet has the v2 schema and settings. RegistrationEnabled and EmailEnabled are false. No live deployment or confirmation email test has been completed.
+Source is in GitHub. The private stepoapps sheet has the v3 schema and settings. RegistrationEnabled and EmailEnabled are false. No live deployment or confirmation email test has been completed.
 
 Keep the spreadsheet restricted to authorized APO staff. Participants do not need Sheet access. Never publish Applications. Preserve existing tabs and records; setup/migration do not clear or recreate Sheet1. Sheet1 was absent at the September 10, 2026 v2 metadata check.
 
 ## Owner project and authorization
 
 1. Sign in at https://script.google.com as the responsible deployment owner. Create a standalone Apps Script project, or use the existing owner project.
-2. Run `npm run build`. Copy all generated files from dist: Server.gs, Core.gs, Setup.gs, Migrate.gs, Mail.gs, Catalog.gs, Index.html and appsscript.json. Enable manifest display in Project Settings. Alternatively authenticate Google's clasp locally and use an ignored `.clasp.json` with `{"scriptId":"YOUR_SCRIPT_ID","rootDir":"dist"}`, then `clasp push`.
-3. Add Script property SPREADSHEET*ID. Production: `1_MmXK52Mgd3W*-tqCFFo-zozrLEhJ1dRbGOe2pJ90NI`. For testing use a separate blank spreadsheet. Run `setup*`for initialization or`migrateV2*` for an existing installation. Setup creates TOKEN_SECRET if absent. Never disclose this secret or rotate it during outstanding retries.
+2. Run `npm run build`. Copy all generated files from dist: Server.gs, Core.gs, Options.gs, Config.gs, OptionSeed.gs, Setup.gs, Migrate.gs, Mail.gs, Catalog.gs, Index.html and appsscript.json. Enable manifest display in Project Settings. Alternatively authenticate Google's clasp locally and use an ignored `.clasp.json` with `{"scriptId":"YOUR_SCRIPT_ID","rootDir":"dist"}`, then `clasp push`.
+3. Add Script property `SPREADSHEET_ID`. Production: `1_MmXK52Mgd3W_-tqCFFo-zozrLEhJ1dRbGOe2pJ90NI`. For testing use a separate blank spreadsheet. Run `setup_` for initialization or `migrateV3_` for an existing installation. Setup creates TOKEN_SECRET if absent. Never disclose this secret or rotate it during outstanding retries.
 4. Authorize the manifest scopes for Sheets, Gmail, mail quota checks, and trigger management. GmailApp uses Google's built-in Apps Script service; no API key or separate email provider is required. Gmail access is a broad OAuth scope. Review the scope screen while signed in as the intended owner.
 5. Run `installWorkers_` as the deployment owner. It idempotently installs a five-minute email worker and daily retention review trigger for that account. Installable triggers run as their creator, so do not let a different staff account install duplicate workers. Functions ending `_` are private to browser RPC.
 
@@ -22,13 +22,13 @@ The sender is the trigger/deployment owner's Gmail account, display name APO STE
 | --------------------------- | -------------------------------------- |
 | PrivacyContact              | apocmwd2026.2027@gmail.com             |
 | RetentionPeriod             | Through December 31, 2026              |
-| ConsentVersion              | STEP-2026-02                           |
+| ConsentVersion              | STEP-2026-03                           |
 | OtherProgramsConsentVersion | APO-OTHER-2026-01                      |
 | RegistrationEnabled         | false until rollout passes             |
 | EmailEnabled                | false until isolated email test passes |
 | Environment                 | production                             |
 
-`migrateV2_` validates legacy header names, rejects missing/duplicate/blank headers, and appends only missing v2 columns. Existing order and extra columns are supported. Historical voucher, Sex, applications, and catalog IDs are preserved. Historical blank email states are not queued. Migration explicitly closes registration and email sending; replacing privacy values never opens either switch.
+`migrateV3_` validates legacy header names, rejects missing/duplicate/blank headers, and appends only missing columns (61 total). Existing order and extra columns are supported. Historical voucher, Sex, applications, and catalog IDs are preserved. Historical blank email states are not queued. Migration explicitly closes registration and email sending; replacing privacy values never opens either switch.
 
 ## Isolated live test, then rollout
 
@@ -46,6 +46,12 @@ Known quota failures use Retry with a 24-hour delay and at most three automatic 
 
 ## Retention and updates
 
-Retention ends December 31, 2026, Philippine time. The daily worker flags records Due for staff review from January 1, 2027. It never deletes records or extends consent. The optional other-program choice uses the same cutoff. Staff must resolve retention and privacy requests; a flag is not permission to retain indefinitely.
+Retention ends December 31, 2026, Philippine time. The daily worker flags records Due for staff review from January 1, 2027. It never deletes records or extends consent. Historical optional-program consent evidence is preserved; its columns are blank for new applications. Staff must resolve retention and privacy requests; a flag is not permission to retain indefinitely.
 
-For updates build and upload all files, run migration if needed, and edit the existing deployment to a new version. Migration closes both switches, so reopen only after verification. On release failure, close both switches and select a previously validated schema-compatible version. V1 is not compatible with v2 consent/headers. Never roll back application data. Preserve tokens for uncertain-response retries. All stored timestamps are ISO UTC. Update consent versions when purposes change and require applicants to reload the notice; answers are not persisted in browser storage.
+For updates build and upload all files, run migration if needed, and edit the existing deployment to a new version. Migration closes both switches, so reopen only after verification. On release failure, close both switches and select a previously validated schema-compatible version. Earlier versions are not compatible with v3 selection keys and consent. Never roll back application data. Preserve tokens for uncertain-response retries. All stored timestamps are ISO UTC. Update consent versions when purposes change and require applicants to reload the notice; answers are not persisted in browser storage.
+
+## V3 configuration migration
+
+`migrateV3_` seeds FormOptions and AddressOptions only when empty, validates populated tables and preserves staff edits. It appends Selection Keys and Configuration Version to Applications and sets STEP-2026-03 consent. It leaves retired status and optional-consent evidence unchanged. Both operating switches close during migration. Do not run the fresh-sheet API initializer on an existing spreadsheet.
+
+The September 10 live migration is already applied. Upload **all** generated files, including Options.gs, Config.gs and OptionSeed.gs, to the owner project before testing. The old deployed frontend must remain closed. Check checkpoint bypass protection, disabled-option correction, NCR/NIR dropdowns and privacy dialog focus during isolated testing. See options.md for safe staff edits.

@@ -35,4 +35,10 @@ Production starts closed, with email sending disabled. The supplied logo, privac
 
 Applications are independent records. Learner ID is reserved and blank until staff establishes identity. One qualifying membership number may identify multiple family applicants. Duplicate hints never delete, merge, or expose records to applicants. Staff review does not automatically confirm enrollment.
 
-The form includes passport-name instructions, numeric APO IDs, separate required/optional consent, sticky section navigation, a native review dialog, and a modal editing drawer. Classes require 25 learners; this is program information, not a live capacity counter. Apps Script quotas and account deployment policy apply. Geographic fields use text inputs. Uncertain email outcomes go to staff review rather than automatic resend. Retention flags never delete records automatically.
+Registration starts with a validated membership checkpoint, followed by a continuous form with sticky navigation, review/edit dialogs and a linked privacy notice. One required consent covers the declared APO purposes. Classes require 25 learners; this is program information, not a live capacity counter. Applicants may submit separate applications for available offerings. Uncertain email outcomes go to staff review; retention flags never delete records automatically.
+
+## Editable dropdowns
+
+FormOptions holds 269 choices, including all 250 supplied country labels in their original order. AddressOptions holds 1,744 geographic choices. Edit labels, Enabled and Display Order in Sheets; keep stable keys and valid parent relationships. The backend validates current choices and saves both readable snapshots and selection keys. Existing applications never change when labels are edited.
+
+Run `node scripts/import-options.mjs` to reproduce the initial seeds. It does not overwrite live staff edits. See [configuration and provenance](docs/options.md), [field mapping](docs/field-mapping.md), and [verification](docs/verification.md).

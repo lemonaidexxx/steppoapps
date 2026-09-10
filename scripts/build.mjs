@@ -8,6 +8,7 @@ if (catalog.length !== 139 || new Set(catalog.map((o) => o.id)).size !== 139)
   throw Error("Catalog integrity failed");
 let html = read("src/index.html")
   .replace("/* APP_CSS */", () => read("src/styles.css"))
+  .replace("/* OPTIONS_JS */", () => read("src/options.js"))
   .replace("/* CORE_JS */", () => read("src/core.js"))
   .replace("/* APP_JS */", () => read("src/app.js"));
 html = html
@@ -35,3 +36,10 @@ fs.copyFileSync(
   path.join(root, "dist/appsscript.json"),
 );
 console.log("Built Apps Script project in dist/.");
+
+fs.writeFileSync(path.join(root, "dist/Options.gs"), read("src/options.js"));
+fs.writeFileSync(path.join(root, "dist/Config.gs"), read("src/config.gs"));
+fs.writeFileSync(
+  path.join(root, "dist/OptionSeed.gs"),
+  "var OPTION_SEED = " + read("data/options.json") + ";\n",
+);

@@ -4,13 +4,14 @@ const fs = require("node:fs"),
 const Core = require("../src/core.js"),
   catalog = require("../data/catalog.json"),
   { valid } = require("./fixtures.cjs");
+const seed = require("../data/options.json");
 function server() {
   const sheets = {
     Settings: [
       ["Key", "Value"],
       ["PrivacyContact", "privacy@example.invalid"],
       ["RetentionPeriod", "Through December 31, 2026"],
-      ["ConsentVersion", "STEP-2026-02"],
+      ["ConsentVersion", "STEP-2026-03"],
       ["RegistrationEnabled", "true"],
       ["Environment", "production"],
       ["OtherProgramsConsentVersion", "APO-OTHER-2026-01"],
@@ -38,6 +39,30 @@ function server() {
         true,
       ]),
     ],
+    FormOptions: [
+      ["List Name", "Option Key", "Label", "Enabled", "Display Order"],
+      ...seed.form.map((o) => [o.list, o.key, o.label, o.enabled, o.order]),
+    ],
+    AddressOptions: [
+      [
+        "Geographic Key",
+        "Level",
+        "Parent Key",
+        "Label",
+        "Enabled",
+        "Display Order",
+        "Source Code",
+      ],
+      ...seed.addresses.map((o) => [
+        o.key,
+        o.level,
+        o.parent,
+        o.label,
+        o.enabled,
+        o.order,
+        o.sourceCode,
+      ]),
+    ],
     Applications: [Core.headers.slice()],
   };
   const control = {
@@ -62,8 +87,12 @@ function server() {
         return this.getRange(1, 1, sheets[name].length, this.getLastColumn());
       },
       getLastRow: () => sheets[name].length,
-      getLastColumn: () => Math.max(...sheets[name].map((r) => r.length)),
+      getLastColumn: () => Math.max(0, ...sheets[name].map((r) => r.length)),
       getMaxColumns: () => 100,
+      getMaxRows: () => 1000,
+      insertRowsAfter() {},
+      setFrozenRows() {},
+      setColumnWidths() {},
       insertColumnsAfter() {},
       appendRow(row) {
         sheets[name].push(row);
@@ -124,7 +153,16 @@ function server() {
         setProperty: (k, v) => (props[k] = v),
       }),
     },
-    SpreadsheetApp: { openById: () => ({ getSheetByName: sheet }), flush() {} },
+    SpreadsheetApp: {
+      openById: () => ({
+        getSheetByName: sheet,
+        insertSheet(name) {
+          sheets[name] = [];
+          return sheet(name);
+        },
+      }),
+      flush() {},
+    },
     LockService: {
       getScriptLock: () => ({
         tryLock: () => !control.busy,
@@ -176,11 +214,19 @@ function server() {
     },
   });
   vm.runInContext(
-    ["src/core.js", "src/server.gs", "src/mail.gs", "src/migrate.gs"]
+    [
+      "src/options.js",
+      "src/core.js",
+      "src/server.gs",
+      "src/mail.gs",
+      "src/migrate.gs",
+      "src/config.gs",
+    ]
       .map((p) => fs.readFileSync(p, "utf8"))
       .join("\n"),
     ctx,
   );
+  ctx.OPTION_SEED = JSON.parse(JSON.stringify(seed));
   return {
     ctx,
     sheets,

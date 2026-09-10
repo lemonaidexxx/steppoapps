@@ -241,7 +241,7 @@
         "A shared opportunity to grow.",
         "STEP welcomes eligible APO members and their families.",
       ) +
-      '<div class="detail-grid"><section class="panel"><h2>Eligible participants</h2><ul class="checklist"><li>APO members who are current OFWs.</li><li>APO members who are former OFWs.</li><li>Their parents, children, siblings, or spouses.</li></ul><h2>Before you apply</h2><p>Have the qualifying APO member’s membership number ready. Staff will check membership manually. Family applicants also provide their relationship and the member’s identifying information.</p><p>Choose one course offering per application. You can submit a separate application later.</p></section><aside class="panel"><h2>' +
+      '<div class="detail-grid"><section class="panel"><h2>Eligible participants</h2><ul class="checklist"><li>APO members who are OFWs or Former OFWs.</li><li>Their parents, children, siblings, or spouses.</li></ul><h2>Before you apply</h2><p>Have the qualifying APO member’s membership number ready. Staff will check membership manually. Family applicants also provide their relationship and the member’s identifying information.</p><p>You may submit as many applications as you wish for available courses. Submit one application per course offering.</p></section><aside class="panel"><h2>' +
       (offering() ? esc(offering().courseName) : "Start with a course") +
       '</h2><p class="muted">' +
       (offering()
@@ -269,19 +269,23 @@
         "</div>"
       );
     return (
-      '<div class="wrap"><section class="panel confirmation"><div class="symbol" aria-hidden="true">✓</div><div class="eyebrow">APPLICATION RECEIVED</div><h1>You’ve taken the next step.</h1><p>Your application has been recorded for APO staff review. This is not a confirmation of enrollment. An email confirmation is queued for delivery; keep your reference below even if email is delayed.</p><p class="helper">Save your registration reference</p><p class="receipt">' +
+      '<div class="wrap"><section class="panel confirmation"><div class="symbol" aria-hidden="true">✓</div><div class="eyebrow">APPLICATION RECEIVED</div><h1>You’ve taken the next step.</h1><p>Your application has been recorded for APO staff review. This is not a confirmation of enrollment. An email confirmation is queued for delivery; keep your reference below even if email is delayed.</p><p>You may submit as many applications as you wish for available courses. Submit one application per course offering.</p><p class="helper">Save your registration reference</p><p class="receipt">' +
       esc(state.receipt.registrationId) +
       "</p>" +
       button("Explore more courses", "courses", "secondary") +
       "</section></div>"
     );
   }
-  function render() {
+  function render(force) {
     if (state.busy) return;
     var route = location.hash.slice(1) || "home";
     var registrationRoute =
       route === "register" || route.startsWith("register/");
-    if (registrationRoute && document.getElementById("application")) {
+    if (
+      force !== true &&
+      registrationRoute &&
+      document.getElementById("application")
+    ) {
       StepRegistration.navigate(route);
       return;
     }
@@ -346,6 +350,9 @@
     if (registrationRoute) StepRegistration.mount(route);
   }
   StepRegistration.configure({
+    redraw: function () {
+      render(true);
+    },
     state: state,
     esc: esc,
     rpc: rpc,
@@ -379,6 +386,7 @@
       if (!result.ok) throw new Error(result.message);
       state.offerings = result.offerings;
       state.settings = result.settings;
+      StepOptions.configure(result.configuration);
       var notice = document.getElementById("notice");
       if (!state.settings.registrationEnabled || window.STEP_PREVIEW) {
         notice.hidden = false;

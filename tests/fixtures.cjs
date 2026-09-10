@@ -1,3 +1,4 @@
+require("../src/options.js").configure(require("../data/options.json"));
 const catalog = require("../data/catalog.json");
 function valid() {
   return {
@@ -7,22 +8,22 @@ function valid() {
     firstName: "Test",
     lastName: "Applicant",
     birthDate: "1990-01-01",
-    sex: "Male",
+    sex: "male",
     phone: "+63 917 000 0000",
     email: "test@example.invalid",
-    category: "OFW",
+    category: "member",
     ofwStatus: "Former OFW",
     membershipNumber: "00123",
-    country: "Seabased OFW",
+    country: "country-seabased",
     occupation: "Test occupation",
-    region: "National Capital Region",
-    province: "Metro Manila",
-    city: "Manila",
+    region: "r13",
+    province: "p-ncr",
+    city: "c1380600000",
     address: "Synthetic test address",
-    goal: "Find jobs in the Philippines.",
+    goal: "goal-0",
     offeringId: catalog[0].id,
     consent: true,
-    consentVersion: "STEP-2026-02",
+    consentVersion: "STEP-2026-03",
   };
 }
 module.exports = { valid };

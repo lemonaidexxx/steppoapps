@@ -26,10 +26,10 @@ test("new required APO fields and numeric ID preserve passport names and zeros",
   assert.ok(
     Core.fields
       .filter((f) => f.id.endsWith("Name"))
-      .every((f) => f.hint === "Enter exactly as shown on your passport."),
+      .every((f) => /exactly as shown on .*passport\./.test(f.hint)),
   );
 });
-test("new records queue once, optional consent is separate and retired fields stay blank", () => {
+test("new records queue once and retired consent fields stay blank", () => {
   const s = server(),
     r = s.request({ ...valid(), otherProgramsConsent: false });
   const a = s.ctx.submitApplication(r);
@@ -38,7 +38,8 @@ test("new records queue once, optional consent is separate and retired fields st
   assert.equal(s.sheets.Applications.length, 2);
   const row = s.record();
   assert.equal(row["APO Membership Number"], "00123");
-  assert.equal(row["Other Programs Consent"], false);
+  assert.equal(row["Other Programs Consent"], "");
+  assert.equal(row["Member OFW Status"], "");
   assert.equal(row["Email Status"], "Pending");
   assert.equal(row["TESDA Voucher Code"], "");
   assert.equal(s.sent.length, 0);
@@ -58,8 +59,8 @@ test("migration preserves historical fields and extra/reordered columns; repeate
           : "",
   );
   s.sheets.Applications.push(old.slice());
-  s.ctx.migrateV2_();
-  s.ctx.migrateV2_();
+  s.ctx.migrateV3_();
+  s.ctx.migrateV3_();
   assert.equal(
     s.sheets.Settings.find((r) => r[0] === "EmailEnabled")[1],
     "false",
@@ -78,7 +79,7 @@ test("migration preserves historical fields and extra/reordered columns; repeate
 test("duplicate headers fail closed", () => {
   const s = server();
   s.sheets.Applications[0].push("Sex");
-  assert.throws(() => s.ctx.migrateV2_());
+  assert.throws(() => s.ctx.migrateV3_());
   assert.equal(s.ctx.submitApplication(s.request()).ok, false);
 });
 test("confirmation sends once with limited data and committee reply-to", () => {
