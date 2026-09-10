@@ -258,7 +258,7 @@
     if (!state.settings.whatsAppEnabled || !/^[1-9][0-9]{6,14}$/.test(number))
       return "";
     return (
-      '<section class="eligibility-contact" aria-labelledby="whatsapp-heading"><h2 id="whatsapp-heading">Questions about eligibility?</h2><p>Contact APO STEP on WhatsApp for assistance.</p><a id="whatsapp-contact" class="btn whatsapp-button" href="https://wa.me/' +
+      '<section class="eligibility-contact" aria-labelledby="whatsapp-heading"><h2 id="whatsapp-heading">Questions about eligibility?</h2><p>Contact APO CMWD on WhatsApp for assistance.</p><a id="whatsapp-contact" class="btn whatsapp-button" href="https://wa.me/' +
       number +
       '" target="_blank" rel="noopener noreferrer" aria-label="Chat on WhatsApp (opens a new tab)">Chat on WhatsApp ↗</a></section>'
     );
@@ -269,7 +269,7 @@
       heading(
         "WHO CAN APPLY",
         "A shared opportunity to grow.",
-        "STEP welcomes eligible APO members and their families.",
+        "",
       ) +
       '<div class="detail-grid"><section class="panel"><h2>Eligible participants</h2><ul class="checklist"><li>APO members who are OFWs or Former OFWs.</li><li>APO members who are parents, children, siblings, or spouses of an OFW or Former OFW.</li></ul><h2>Before you apply</h2><p>Have your own APO Chapter, Batch Year and ID ready. Every applicant must be an APO member; staff will verify membership manually. Family applicants provide their OFW relative’s information. The OFW relative does not need to be an APO member.</p><p>You may submit as many applications as you wish for available courses. Submit one application per course offering.</p></section><aside class="panel"><h2>' +
       (offering() ? esc(offering().courseName) : "Start with a course") +
