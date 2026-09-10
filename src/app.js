@@ -152,20 +152,36 @@
       '</select></label><button class="filter-reset" id="reset">Clear filters</button></div><div id="results"></div></div>'
     );
   }
+  var catalogPageSize = 12;
+  var catalogResizeTimer;
+  window.addEventListener("resize", function () {
+    clearTimeout(catalogResizeTimer);
+    catalogResizeTimer = setTimeout(function () {
+      if (document.getElementById("results")) results();
+    }, 150);
+  });
   function results() {
+    var container = document.getElementById("results");
+    var columns = Math.max(1, Math.floor((container.clientWidth + 20) / 320));
+    var pageSize = Math.ceil(12 / columns) * columns;
+    if (pageSize !== catalogPageSize) {
+      state.filter.page = Math.floor(((state.filter.page - 1) * catalogPageSize) / pageSize) + 1;
+      catalogPageSize = pageSize;
+    }
+    container.style.setProperty("--catalog-columns", columns);
     var rows = StepCore.filterOfferings(
         state.offerings,
         state.filter.q,
         state.filter.modality,
         state.filter.city,
       ),
-      pages = Math.max(1, Math.ceil(rows.length / 12));
+      pages = Math.max(1, Math.ceil(rows.length / pageSize));
     state.filter.page = Math.min(pages, state.filter.page);
-    var start = (state.filter.page - 1) * 12;
+    var start = (state.filter.page - 1) * pageSize;
     document.getElementById("results").innerHTML =
       '<div class="grid">' +
       rows
-        .slice(start, start + 12)
+        .slice(start, start + pageSize)
         .map(card)
         .join("") +
       "</div>" +
