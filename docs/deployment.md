@@ -1,3 +1,5 @@
+For the GitHub Pages public address, see [GitHub Pages setup](github-pages.md). Existing deployments only need the Code.gs and Bridge.html update; do not repeat initialization.
+
 # Deploy and operate APO STEP
 
 ## Current state

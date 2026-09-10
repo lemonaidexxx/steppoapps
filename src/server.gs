@@ -1,5 +1,6 @@
 /* Only doGet, getPublicData, issueSubmissionToken and submitApplication are public. */
-function doGet() {
+function doGet(event) {
+  if (event && event.parameter && event.parameter.mode === "bridge") return bridgeOutput_(event.parameter);
   return HtmlService.createHtmlOutputFromFile("Index")
     .setTitle("APO STEP | Skills for your next chapter")
     .addMetaTag("viewport", "width=device-width, initial-scale=1");

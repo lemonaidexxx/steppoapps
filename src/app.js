@@ -27,6 +27,10 @@
         window.STEP_PREVIEW(name, arg).then(resolve, reject);
         return;
       }
+      if (window.STEP_REMOTE) {
+        window.STEP_REMOTE(name, arg).then(resolve, reject);
+        return;
+      }
       if (!window.google || !google.script) {
         reject(new Error("Service unavailable"));
         return;
@@ -179,7 +183,10 @@
           (state.filter.page === pages ? "disabled" : "") +
           ">Next</button></div>"
         : "") +
-      '<div class="results-info" role="status"><span>' + rows.length + (rows.length === 1 ? ' course offering' : ' course offerings') + '</span></div>';
+      '<div class="results-info" role="status"><span>' +
+      rows.length +
+      (rows.length === 1 ? " course offering" : " course offerings") +
+      "</span></div>";
     ["prev", "next"].forEach(function (id) {
       var el = document.getElementById(id);
       if (el)
@@ -232,8 +239,13 @@
   }
   function whatsappHelp() {
     var number = String(state.settings.whatsAppNumber || "");
-    if (!state.settings.whatsAppEnabled || !/^[1-9][0-9]{6,14}$/.test(number)) return "";
-    return '<section class="eligibility-contact" aria-labelledby="whatsapp-heading"><h2 id="whatsapp-heading">Questions about eligibility?</h2><p>Contact APO STEP on WhatsApp for assistance.</p><a id="whatsapp-contact" class="btn whatsapp-button" href="https://wa.me/' + number + '" target="_blank" rel="noopener noreferrer" aria-label="Chat on WhatsApp (opens a new tab)">Chat on WhatsApp ↗</a></section>';
+    if (!state.settings.whatsAppEnabled || !/^[1-9][0-9]{6,14}$/.test(number))
+      return "";
+    return (
+      '<section class="eligibility-contact" aria-labelledby="whatsapp-heading"><h2 id="whatsapp-heading">Questions about eligibility?</h2><p>Contact APO STEP on WhatsApp for assistance.</p><a id="whatsapp-contact" class="btn whatsapp-button" href="https://wa.me/' +
+      number +
+      '" target="_blank" rel="noopener noreferrer" aria-label="Chat on WhatsApp (opens a new tab)">Chat on WhatsApp ↗</a></section>'
+    );
   }
   function eligibility() {
     return (
@@ -255,7 +267,8 @@
         offering() ? "register" : "courses",
         "gold",
       ) +
-      whatsappHelp() + "</aside></div></div>"
+      whatsappHelp() +
+      "</aside></div></div>"
     );
   }
   function confirmation() {

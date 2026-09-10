@@ -2,7 +2,7 @@
 
 Skills. Training. Empowerment. Progress. Developmental Year 2026 - 2027.
 
-An accessible, responsive course catalog and continuous application form for members of Alpha Phi Omega Philippines, Inc., jointly administered by the Committee on Training and Skills Development and the Committee on Members’ Welfare and Development. Google Apps Script serves the website, writes to a private Google Sheet, and queues confirmation emails through the deployment owner’s Gmail. No participant sign-in or analytics.
+An accessible, responsive course catalog and continuous application form for members of Alpha Phi Omega Philippines, Inc., jointly administered by the Committee on Training and Skills Development and the Committee on Members’ Welfare and Development. GitHub Pages serves the public website. Google Apps Script connects through a hidden bridge, writes to a private Google Sheet, and queues confirmation emails through the deployment owner’s Gmail. No participant sign-in or analytics.
 
 ## Local development
 
@@ -46,3 +46,7 @@ Registration starts with a validated membership checkpoint, followed by a contin
 FormOptions holds 269 choices, including all 250 supplied country labels in their original order. AddressOptions holds 1,744 geographic choices. Edit labels, Enabled and Display Order in Sheets; keep stable keys and valid parent relationships. The backend validates current choices and saves both readable snapshots and selection keys. Existing applications never change when labels are edited.
 
 Run `node scripts/import-options.mjs` to reproduce the initial seeds. It does not overwrite live staff edits. See [configuration and provenance](docs/options.md), [field mapping](docs/field-mapping.md), and [verification](docs/verification.md).
+
+## Public GitHub URL
+
+https://lemonaidexxx.github.io/steppoapps/ — follow docs/github-pages.md for the one-time Apps Script bridge update. The Pages workflow publishes dist/pages; the endpoint is configured in site-config.json.
