@@ -283,6 +283,7 @@ main {
   font-size: 14px;
   line-height: 1.7;
   color: #d0dce9;
+  white-space: nowrap;
 }
 .hero-foot {
   max-width: 1296px;
@@ -292,6 +293,7 @@ main {
   display: flex;
   gap: 50px;
   align-items: center;
+  flex-wrap: wrap;
 }
 .hero-foot small {
   font-size: 10px;
@@ -301,7 +303,8 @@ main {
 }
 .hero-foot p {
   font-size: 12px;
-  max-width: 310px;
+  max-width: none;
+  white-space: nowrap;
   margin: 0;
   color: var(--muted);
 }
@@ -750,7 +753,7 @@ footer p {
     margin: 40px 0;
   }
   .art-bottom {
-    font-size: 12px;
+    font-size: clamp(8px, 2.3vw, 12px);
   }
   .stairs {
     bottom: 10px;
@@ -762,6 +765,7 @@ footer p {
   }
   .hero-foot p {
     max-width: none;
+    font-size: clamp(8px, 2.6vw, 12px);
   }
   .wrap {
     padding-top: 30px;
