@@ -23,7 +23,7 @@ const assert = require("node:assert/strict");
   await page.locator("#continue-checkpoint").click();
   assert.equal(await page.evaluate(() => document.activeElement.id), "chapter");
   assert.equal(await page.locator("#voucher").count(), 0);
-  assert.equal(await page.locator("#whatsapp-contact").getAttribute("href"), "https://wa.me/639927110929");
+  assert.equal(await page.locator("#whatsapp-contact").count(), 0);
   const fill = async (values, prefix = "") => {
     for (const [id, value] of Object.entries(values)) {
       const el = page.locator("#" + prefix + id);

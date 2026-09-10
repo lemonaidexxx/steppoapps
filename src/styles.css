@@ -1144,31 +1144,5 @@ dialog::backdrop {
 .form-grid > [data-field="relationship"] {
   grid-column: 1 / -1;
 }
-.whatsapp-contact {
-  position: fixed;
-  bottom: max(16px, env(safe-area-inset-bottom));
-  right: 20px;
-  z-index: 20;
-  background: #075e41;
-  color: white;
-  padding: 12px 18px;
-  border-radius: 30px;
-  font-weight: 700;
-  box-shadow: 0 4px 18px #142e4c30;
-}
-[data-whatsapp][hidden],
-body:has(dialog[open]) .whatsapp-contact {
-  display: none;
-}
-body:has(#whatsapp-contact:not([hidden])) {
-  padding-bottom: 80px;
-}
-body:has(#whatsapp-contact:not([hidden])) .form-actions {
-  padding-bottom: 80px;
-}
-@media (max-width: 600px) {
-  .whatsapp-contact {
-    right: 12px;
-    font-size: 13px;
-  }
-}
+.eligibility-contact { margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--line); }
+.whatsapp-button { background: #075e41; color: white; }

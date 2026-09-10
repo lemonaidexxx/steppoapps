@@ -58,4 +58,4 @@ The September 10 live migration is already applied. Upload **all** generated fil
 
 ## Membership and WhatsApp update
 
-Run migrateV4\_ after uploading all rebuilt files. It appends Membership Details Belong To (62 columns total), seeds DevelopmentalYear=2026 - 2027, WhatsAppNumber=639927110929, WhatsAppEnabled=true, and requires consent STEP-2026-04. Existing contact settings are preserved on repeated runs. DistrictYear remains a compatibility key. WhatsApp is a direct public contact link with no automated sending or OpenWA server. Both registration/email switches remain closed until owner verification.
+Run migrateV4\_ after uploading all rebuilt files. It appends Membership Details Belong To (62 columns total), seeds DevelopmentalYear=2026 - 2027, WhatsAppNumber=639927110929, WhatsAppEnabled=true, and requires consent STEP-2026-04. Existing contact settings are preserved on repeated runs. DistrictYear remains a compatibility key. WhatsApp appears in the Eligibility page assistance section as a direct public contact link with no automated sending or OpenWA server. Both registration/email switches remain closed until owner verification.

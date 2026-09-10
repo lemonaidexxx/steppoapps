@@ -70,8 +70,9 @@ test("v3 consent is rejected; family-only wording and direct chat controls are p
   assert.ok(!app.includes("Compare training options by institution"));
   assert.ok(!app.includes("DISTRICT YEAR"));
   assert.match(app, /https:\/\/wa.me\//);
-  assert.match(html, /target="_blank"\s+rel="noopener noreferrer"/);
-  assert.match(css, /body:has\(dialog\[open\]\)/);
+  assert.match(app, /target="_blank"\s+rel="noopener noreferrer"/);
+  assert.ok(!html.includes("whatsapp-contact"));
+  assert.ok(!css.includes(".whatsapp-contact"));
   assert.match(form, /Enter your own APO chapter/);
   assert.ok(!form.includes("qualifying APO member"));
 });

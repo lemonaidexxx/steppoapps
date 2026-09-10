@@ -231,6 +231,12 @@
       '">Select this course ↗</button><p class="helper" style="margin-top:16px">Application is subject to staff review. Submission does not guarantee enrollment.</p></aside></div></div>'
     );
   }
+  function whatsappHelp() {
+    var number = String(state.settings.whatsAppNumber || "");
+    if (!state.settings.whatsAppEnabled || !/^[1-9][0-9]{6,14}$/.test(number)) return "";
+    var label = number === "639927110929" ? "+63 992 711 0929" : "+" + number;
+    return '<section class="eligibility-contact" aria-labelledby="whatsapp-heading"><h2 id="whatsapp-heading">Questions about eligibility?</h2><p>Contact APO STEP on WhatsApp for assistance.</p><p>' + esc(label) + '</p><a id="whatsapp-contact" class="btn whatsapp-button" href="https://wa.me/' + number + '" target="_blank" rel="noopener noreferrer" aria-label="Chat on WhatsApp (opens a new tab)">Chat on WhatsApp ↗</a></section>';
+  }
   function eligibility() {
     return (
       '<div class="wrap">' +
@@ -251,7 +257,7 @@
         offering() ? "register" : "courses",
         "gold",
       ) +
-      "</aside></div></div>"
+      whatsappHelp() + "</aside></div></div>"
     );
   }
   function confirmation() {
@@ -387,21 +393,6 @@
       document.getElementById("developmental-year").textContent =
         "Developmental Year " +
         (state.settings.developmentalYear || "2026 - 2027");
-      var number = String(state.settings.whatsAppNumber || "");
-      document.querySelectorAll("[data-whatsapp]").forEach(function (link) {
-        link.hidden =
-          !state.settings.whatsAppEnabled || !/^[1-9][0-9]{6,14}$/.test(number);
-        if (!link.hidden) link.href = "https://wa.me/" + number;
-        if (link.id === "whatsapp-footer") {
-          link.parentElement.hidden = link.hidden;
-          link.textContent =
-            number === "639927110929" ? "+63 992 711 0929" : "+" + number;
-          link.setAttribute(
-            "aria-label",
-            "Chat on WhatsApp at " + link.textContent + " (opens a new tab)",
-          );
-        }
-      });
       StepOptions.configure(result.configuration);
       var notice = document.getElementById("notice");
       if (!state.settings.registrationEnabled || window.STEP_PREVIEW) {
